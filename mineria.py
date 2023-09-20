@@ -36,6 +36,9 @@ def condicionArticuloURL(opcion):
         return
 '''
 
+paginasVisitadas = 0
+articulosRecabados = 0
+
 while True:
 
     if ultimaPagina:
@@ -45,6 +48,7 @@ while True:
     time.sleep(1)
 
     if page.status_code == 200:
+        paginasVisitadas += 1
         soup = BeautifulSoup(page.content, 'html.parser')
         try:
             URL = str(soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link',
@@ -58,27 +62,31 @@ while True:
                           if 'click1' not in str(x['href'])]
 
         for articulo in linksArticulos:
+            hayPrecio = True
+            precio = 0
             especificaciones = []
+
             while True:
                 page = requests.get(articulo, headers=HEADER)
                 time.sleep(1)
                 soup = BeautifulSoup(page.content, 'html.parser')
+
+                try:
+                    precio = int(str(soup.find('span', class_='andes-money-amount__fraction').text.strip()).replace('.', ''))
+                except:
+                    hayPrecio = False
+                    break
+
                 especificaciones = soup.find_all('tr', class_='andes-table__row')
                 if len(especificaciones) > 0:
                     break
 
-            cabeceras = [cabecera.find('th').text.strip() for cabecera in especificaciones]
-            datos = [dato.find('td').text.strip() for dato in especificaciones]
-            datosOrdenados = []
-            cabecerasOrdenadas = []
-            unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol').text.strip())
-            precio = 0
-            try:
-                precio = int(str(soup.find('span', class_='andes-money-amount__fraction').text.strip()).replace('.', ''))
-            except:
-                hayPrecio = False
-
             if hayPrecio:
+                articulosRecabados += 1
+                cabeceras = [cabecera.find('th').text.strip() for cabecera in especificaciones]
+                datos = [dato.find('td').text.strip() for dato in especificaciones]
+                datosOrdenados = []
+                unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol').text.strip())
                 if primerRegistro:
                     primerRegistro = False
                     cabeceras.append('Unidad Monetaria')
@@ -133,3 +141,7 @@ while True:
 
             print(len(df))
             df.to_csv(str(nombreArchivo))
+
+print(' ')
+print('Páginas visitadas:', paginasVisitadas)
+print('Artículos recabados:', articulosRecabados)
