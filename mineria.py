@@ -39,6 +39,8 @@ def condicionArticuloURL(opcion):
 paginasVisitadas = 0
 articulosRecabados = 0
 
+tiempo_inicio = time.time()
+
 while True:
 
     if ultimaPagina:
@@ -142,6 +144,13 @@ while True:
             print(len(df))
             df.to_csv(str(nombreArchivo))
 
+tiempo_fin = time.time()
+tiempo_total = tiempo_fin-tiempo_inicio
+minutos = tiempo_total/60
+segundos = round((minutos % 1)*60, 2)
+minutos = int(minutos // 1)
+
 print(' ')
 print('Páginas visitadas:', paginasVisitadas)
 print('Artículos recabados:', articulosRecabados)
+print('Tiempo transcurrido:', str(minutos)+':'+str(segundos))
