@@ -19,7 +19,6 @@ nombreArchivo = busqueda + '.csv'
 ultimaPagina = False
 primerRegistro = True
 hayPrecio = True
-primerVuelta = True
 timeoutException = False
 abortarEjecucion = False
 calculandoTiempoEstimado = True
@@ -41,12 +40,29 @@ def condicionArticuloURL(opcion):
 paginasVisitadas = 0
 articulosRecabados = 0
 tiempoEstimado = 0
-limiteTimeouts = 0
-limite404 = 0
+limiteTimeoutsArticulo = 0
+limiteTimeoutsGeneral = 0
+limiteStatus400 = 0
 
 page = None
 
 tiempo_inicio = time.time()
+
+
+def AsignacionDatosOrdenados():
+    for column in df.columns:
+        try:
+            indicesCabeceras.append(cabeceras.index(column))
+        except:
+            indicesCabeceras.append(-1)
+
+    for index in indicesCabeceras:
+        if index != -1:
+            datosOrdenados.append(datos[index])
+        else:
+            datosOrdenados.append(np.nan)
+
+    df.loc[df.shape[0]] = datosOrdenados
 
 
 def SegundosAHHMMSS(segundo):
@@ -61,35 +77,34 @@ def SegundosAHHMMSS(segundo):
 
 
 while True:
-    timeoutException = False
-    if ultimaPagina:
-        break
-
-    if abortarEjecucion:
+    if ultimaPagina or abortarEjecucion:
         break
 
     try:
         page = requests.get(url=URL, headers=HEADER, timeout=5)
-        time.sleep(1)
+        limiteTimeoutsGeneral = 0
     except:
         print(' ')
         print('Excepción de timeout.')
-        limiteTimeouts += 1
-
+        limiteTimeoutsGeneral += 1
+        print('Intento ' + str(limiteTimeoutsGeneral) + ' de 5')
+    time.sleep(1)
     if page is not None:
         if page.status_code == 200:
-            limiteTimeouts = 0
-            primerVuelta = False
+            limiteTimeoutsArticulo = 0
             paginasVisitadas += 1
             soup = BeautifulSoup(page.content, 'html.parser')
             if calculandoTiempoEstimado:
                 calculandoTiempoEstimado = False
-                cantidadPaginas = int(str(soup.find('li', class_='andes-pagination__page-count')
-                                          .text.strip()).replace('de ', ''))
+                try:
+                    cantidadPaginas = int(str(soup.find('li', class_='andes-pagination__page-count')
+                                              .text.strip()).replace('de ', ''))
+                except:
+                    cantidadPaginas = 1
                 tiempoEstimado = (cantidadPaginas + cantidadPaginas * 48) * 2.08656
-                print('')
+                print('-----------------------------------------------')
                 print('Tiempo estimado calculado:', SegundosAHHMMSS(int(tiempoEstimado)))
-                print('')
+                print('-----------------------------------------------')
 
             try:
                 URL = str(soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link',
@@ -108,19 +123,20 @@ while True:
                 especificaciones = []
 
                 while True:
-                    while limiteTimeouts < 5:
+                    while limiteTimeoutsArticulo < 5:
                         timeoutException = False
                         try:
                             page = requests.get(articulo, headers=HEADER, timeout=5)
-                            time.sleep(1)
-                            limiteTimeouts = 0
+                            limiteTimeoutsArticulo = 0
+                            limiteTimeoutsGeneral = 0
                             break
                         except:
                             timeoutException = True
-                            limiteTimeouts += 1
+                            limiteTimeoutsArticulo += 1
                             print(' ')
                             print('No fue posible realizar la solicitud del artículo.')
-                            print('Intento ' + str(limiteTimeouts) + ' de 5')
+                            print('Intento ' + str(limiteTimeoutsArticulo) + ' de 5')
+                        time.sleep(1)
 
                     if not timeoutException:
                         soup = BeautifulSoup(page.content, 'html.parser')
@@ -138,100 +154,85 @@ while True:
                     else:
                         break
 
-                if hayPrecio and not timeoutException:
-                    articulosRecabados += 1
-                    cabeceras = [cabecera.find('th').text.strip() for cabecera in especificaciones]
+                if not timeoutException:
+                    if hayPrecio:
+                        articulosRecabados += 1
+                        cabeceras = [cabecera.find('th').text.strip() for cabecera in especificaciones]
 
-                    datos = [dato.find('td').text.strip() for dato in especificaciones]
+                        datos = [dato.find('td').text.strip() for dato in especificaciones]
 
-                    datosOrdenados = []
-                    unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol').text.strip())
-                    if primerRegistro:
-                        primerRegistro = False
-                        cabeceras.append('Unidad Monetaria')
-                        cabeceras.append('Precio')
-                        cabeceras.append('Link')
-                        datos.append('ARS' if unidadMonetaria == '$' else 'U$S')
-                        datos.append(precio)
-                        datos.append(articulo)
-                        df = pd.DataFrame(columns=cabeceras)
-                        df['Precio'] = df['Precio'].astype(int)
-                        df.loc[df.shape[0]] = datos
-                    else:
-                        if set(cabeceras).issubset(df.columns):
-                            if len(cabeceras) == len(df.columns):
-                                indicesCabeceras = [cabeceras.index(column) for column in df.columns]
-                                datosOrdenados = [datos[i] for i in indicesCabeceras]
-                                df.loc[df.shape[0]] = datosOrdenados
-                            elif len(cabeceras) < len(df.columns):
-                                indicesCabeceras = []
-                                for column in df.columns:
-                                    try:
-                                        indicesCabeceras.append(cabeceras.index(column))
-                                    except:
-                                        indicesCabeceras.append(-1)
-
-                                for indices in indicesCabeceras:
-                                    if indices != -1:
-                                        datosOrdenados.append(datos[indices])
-                                    else:
-                                        datosOrdenados.append(np.nan)
-
-                                df.loc[df.shape[0]] = datosOrdenados
+                        datosOrdenados = []
+                        unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol')
+                                              .text.strip())
+                        if primerRegistro:
+                            primerRegistro = False
+                            cabeceras.append('Unidad Monetaria')
+                            cabeceras.append('Precio')
+                            cabeceras.append('Link')
+                            datos.append('ARS' if unidadMonetaria == '$' else 'U$S')
+                            datos.append(precio)
+                            datos.append(articulo)
+                            df = pd.DataFrame(columns=cabeceras)
+                            df.loc[df.shape[0]] = datos
                         else:
-                            indicesCabeceras = []
-                            for cabecera in cabeceras:
-                                if cabecera not in df.columns:
-                                    df[cabecera] = np.nan
+                            if set(cabeceras).issubset(df.columns):
+                                if len(cabeceras) == len(df.columns):
+                                    indicesCabeceras = [cabeceras.index(column) for column in df.columns]
+                                    datosOrdenados = [datos[i] for i in indicesCabeceras]
+                                    df.loc[df.shape[0]] = datosOrdenados
+                                elif len(cabeceras) < len(df.columns):
+                                    indicesCabeceras = []
+                                    AsignacionDatosOrdenados()
+                            else:
+                                indicesCabeceras = []
+                                for cabecera in cabeceras:
+                                    if cabecera not in df.columns:
+                                        df[cabecera] = np.nan
+                                AsignacionDatosOrdenados()
 
-                            for column in df.columns:
-                                try:
-                                    indicesCabeceras.append(cabeceras.index(column))
-                                except:
-                                    indicesCabeceras.append(-1)
+                            df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
+                            df.loc[df.shape[0] - 1, 'Precio'] = precio
+                            df.loc[df.shape[0] - 1, 'Link'] = articulo
 
-                            for indices in indicesCabeceras:
-                                if indices != -1:
-                                    datosOrdenados.append(datos[indices])
-                                else:
-                                    datosOrdenados.append(np.nan)
-
-                            df.loc[df.shape[0]] = datosOrdenados
-
-                        df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
-                        df.loc[df.shape[0] - 1, 'Precio'] = precio
-                        df.loc[df.shape[0] - 1, 'Link'] = articulo
+                            print(len(df))
+                            df['Precio'] = df['Precio'].astype(int)
+                            df.to_csv(str(nombreArchivo), index=False, encoding='utf-16')
+                    else:
+                        print(' ')
+                        print('Artículo sin precio. Pasando al siguiente...')
                 else:
-                    abortarEjecucion = True
-                    print('Límite de timeouts alcanzado.')
-                    print('Abortando ejecución...')
-                    break
-
-                print(len(df))
-                df.to_csv(str(nombreArchivo), index=False, encoding='utf-16')
-        elif page.status_code >= 400:
-            limite404 += 1
+                    limiteTimeoutsGeneral += 1
+                    print(' ')
+                    if limiteTimeoutsGeneral == 5:
+                        print('Límite de timeouts consecutivos alcanzado para el artículo.')
+                        print('Cinco artículos consecutivos han tenido excepciones de timeout.')
+                        print('Abortando ejecución...')
+                        abortarEjecucion = True
+                        break
+                    else:
+                        limiteTimeoutsArticulo = 0
+                        print('Límite de timeouts consecutivos alcanzado para el artículo. Pasando al siguiente...')
+        else:
+            limiteStatus400 += 1
             print(' ')
             print('No fue posible realizar la solicitud.')
             print('Status: ' + str(page.status_code))
-            print('Intento ' + str(limite404) + ' de 5')
-            if limite404 == 5:
-                print(' ')
+            if limiteStatus400 == 5:
                 print('Quinto intento realizado.')
-                print('Status: ' + str(page.status_code))
                 print('Abortando ejecución...')
                 abortarEjecucion = True
                 break
-    else:
-        if limiteTimeouts == 5:
-            print(' ')
-            print('Límite de timeouts alcanzado.')
-            try:
-                print('Status: ' + str(page.status_code))
-            except:
-                print('Sin conexión.')
-            print('Abortando ejecución...')
-            break
+            else:
+                print('Intento ' + str(limiteStatus400) + ' de 5')
+    elif limiteTimeoutsGeneral == 5:
+        print(' ')
+        print('Límite de timeouts consecutivos alcanzado.')
+        try:
+            print('Status: ' + str(page.status_code))
+        except:
+            print('Sin conexión.')
+        print('Abortando ejecución...')
+        break
 
 
 segundos = time.time() - tiempo_inicio
