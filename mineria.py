@@ -14,7 +14,8 @@ busqueda = input('Ingrese su búsqueda: ')
 1: Sólo Nuevos
 2: Sólo Usados
 '''
-nombreArchivo = busqueda + '.csv'
+nombreArchivoCSV = busqueda + '.csv'
+nombreArchivoXLSX = busqueda + '.xlsx'
 
 ultimaPagina = False
 primerRegistro = True
@@ -93,7 +94,9 @@ while True:
         if page.status_code == 200:
             limiteTimeoutsArticulo = 0
             paginasVisitadas += 1
-            soup = BeautifulSoup(page.content, 'html.parser')
+            soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
+            # soup = BeautifulSoup(page.content, 'html.parser',exclude_encodings=["iso-8859-11", "iso-8859-13",
+            # 'iso-15924-998'])
             if calculandoTiempoEstimado:
                 calculandoTiempoEstimado = False
                 try:
@@ -101,7 +104,7 @@ while True:
                                               .text.strip()).replace('de ', ''))
                 except:
                     cantidadPaginas = 1
-                tiempoEstimado = (cantidadPaginas + cantidadPaginas * 48) * 2.08656
+                tiempoEstimado = (cantidadPaginas + cantidadPaginas * 48) * 2
                 print('-----------------------------------------------')
                 print('Tiempo estimado calculado:', SegundosAHHMMSS(int(tiempoEstimado)))
                 print('-----------------------------------------------')
@@ -174,6 +177,7 @@ while True:
                             datos.append(articulo)
                             df = pd.DataFrame(columns=cabeceras)
                             df.loc[df.shape[0]] = datos
+                            print(len(df))
                         else:
                             if set(cabeceras).issubset(df.columns):
                                 if len(cabeceras) == len(df.columns):
@@ -196,7 +200,6 @@ while True:
 
                             print(len(df))
                             df['Precio'] = df['Precio'].astype(int)
-                            df.to_csv(str(nombreArchivo), index=False, encoding='utf-16')
                     else:
                         print(' ')
                         print('Artículo sin precio. Pasando al siguiente...')
@@ -234,6 +237,15 @@ while True:
         print('Abortando ejecución...')
         break
 
+
+try:
+    df.to_csv(str(nombreArchivoCSV), index=False, encoding='iso-8859-1')
+    print('Encoding Latin-1')
+except:
+    df.to_csv(str(nombreArchivoCSV), index=False, encoding='utf-8')
+    print('Encoding UTF-8')
+finally:
+    df.to_excel(str(nombreArchivoXLSX), index=False)
 
 segundos = time.time() - tiempo_inicio
 
