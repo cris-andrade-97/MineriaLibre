@@ -51,40 +51,51 @@ tiempo_inicio = time.time()
 
 
 def CambioCaracteresRaros(tag, specs):
-    lista = []
-    for fila in specs:
-        lista.append(str(fila.find(tag).text.strip())
-                     .replace('├í', 'á')
-                     .replace('ĂĄ', 'á')
-                     .replace('├Ī', 'á')
-                     .replace('รก', 'á')
-                     .replace('Ć”', 'á')
-                     .replace('├®', 'é')
-                     .replace('Ć©', 'é')
-                     .replace('รฉ', 'é')
-                     .replace('ûˋ', 'é')
-                     .replace('├¡', 'í')
-                     .replace('Ć­', 'í')
-                     .replace('รญ', 'í')
-                     .replace('ûÙ', 'í')
-                     .replace('├│', 'ó')
-                     .replace('Ăł', 'ó')
-                     .replace('รณ', 'ó')
-                     .replace('Ć³', 'ó')
-                     .replace('û°', 'ó')
-                     .replace('Ćŗ', 'ú')
-                     .replace('├ü', 'Á')
-                     .replace('Ć', 'Á')
-                     .replace('û', 'Á')
-                     .replace('┬░', '°')
-                     .replace('ô¯', '°')
-                     .replace('├▒', 'ñ')
-                     .replace('Ă±', 'ñ')
-                     .replace('Ć±', 'ñ')
-                     .replace('รฑ', 'ñ')
-                     .replace('ûÝ', 'ñ'))
-
-    return lista
+    return [str(fila.find(tag).text.strip())
+            .replace('├í', 'á')
+            .replace('ĂĄ', 'á')
+            .replace('ÃĄ', 'á')
+            .replace('├Ī', 'á')
+            .replace('รก', 'á')
+            .replace('Ć”', 'á')
+            .replace('├®', 'é')
+            .replace('Ć©', 'é')
+            .replace('รฉ', 'é')
+            .replace('ûˋ', 'é')
+            .replace('√©', 'é')
+            .replace('ÃĐ', 'é')
+            .replace('├¡', 'í')
+            .replace('Ć­', 'í')
+            .replace('รญ', 'í')
+            .replace('ûÙ', 'í')
+            .replace('├Ł', 'í')
+            .replace('√≠', 'í')
+            .replace('Ã­', 'í')
+            .replace('├│', 'ó')
+            .replace('Ăł', 'ó')
+            .replace('รณ', 'ó')
+            .replace('Ć³', 'ó')
+            .replace('û°', 'ó')
+            .replace('√≥', 'ó')
+            .replace('Ãģ', 'ó')
+            .replace('Ćŗ', 'ú')
+            .replace('Ãš', 'ú')
+            .replace('รบ', 'ú')
+            .replace('├ü', 'Á')
+            .replace('Ć', 'Á')
+            .replace('û', 'Á')
+            .replace('√Å', 'Á')
+            .replace('┬░', '°')
+            .replace('ô¯', '°')
+            .replace('ยฐ', '°')
+            .replace('├▒', 'ñ')
+            .replace('Ă±', 'ñ')
+            .replace('Ć±', 'ñ')
+            .replace('√±', 'ñ')
+            .replace('Ãą', 'ñ')
+            .replace('รฑ', 'ñ')
+            .replace('ûÝ', 'ñ')
+            for fila in specs]
 
 
 def AsignacionDatosOrdenados():
@@ -275,14 +286,7 @@ while True:
 
 df['Precio'] = df['Precio'].astype(int)
 
-try:
-    df.to_csv(str(nombreArchivoCSV), index=False, encoding='iso-8859-1')
-    print('Encoding Latin-1')
-except:
-    df.to_csv(str(nombreArchivoCSV), index=False, encoding='utf-8')
-    print('Encoding UTF-8')
-finally:
-    df.to_excel(str(nombreArchivoXLSX), index=False)
+df.to_excel(str(nombreArchivoXLSX), index=False)
 
 segundos = time.time() - tiempo_inicio
 
