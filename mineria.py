@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import requests
 import time
 
-HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"}
+HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"}
 
 busqueda = input('Ingrese su búsqueda: ')
 
@@ -48,6 +48,43 @@ limiteStatus400 = 0
 page = None
 
 tiempo_inicio = time.time()
+
+
+def CambioCaracteresRaros(tag, specs):
+    lista = []
+    for fila in specs:
+        lista.append(str(fila.find(tag).text.strip())
+                     .replace('├í', 'á')
+                     .replace('ĂĄ', 'á')
+                     .replace('├Ī', 'á')
+                     .replace('รก', 'á')
+                     .replace('Ć”', 'á')
+                     .replace('├®', 'é')
+                     .replace('Ć©', 'é')
+                     .replace('รฉ', 'é')
+                     .replace('ûˋ', 'é')
+                     .replace('├¡', 'í')
+                     .replace('Ć­', 'í')
+                     .replace('รญ', 'í')
+                     .replace('ûÙ', 'í')
+                     .replace('├│', 'ó')
+                     .replace('Ăł', 'ó')
+                     .replace('รณ', 'ó')
+                     .replace('Ć³', 'ó')
+                     .replace('û°', 'ó')
+                     .replace('Ćŗ', 'ú')
+                     .replace('├ü', 'Á')
+                     .replace('Ć', 'Á')
+                     .replace('û', 'Á')
+                     .replace('┬░', '°')
+                     .replace('ô¯', '°')
+                     .replace('├▒', 'ñ')
+                     .replace('Ă±', 'ñ')
+                     .replace('Ć±', 'ñ')
+                     .replace('รฑ', 'ñ')
+                     .replace('ûÝ', 'ñ'))
+
+    return lista
 
 
 def AsignacionDatosOrdenados():
@@ -94,9 +131,9 @@ while True:
         if page.status_code == 200:
             limiteTimeoutsArticulo = 0
             paginasVisitadas += 1
+
             soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
-            # soup = BeautifulSoup(page.content, 'html.parser',exclude_encodings=["iso-8859-11", "iso-8859-13",
-            # 'iso-15924-998'])
+
             if calculandoTiempoEstimado:
                 calculandoTiempoEstimado = False
                 try:
@@ -152,6 +189,7 @@ while True:
                             break
 
                         especificaciones = soup.find_all('tr', class_='andes-table__row')
+
                         if len(especificaciones) > 0:
                             break
                     else:
@@ -160,9 +198,9 @@ while True:
                 if not timeoutException:
                     if hayPrecio:
                         articulosRecabados += 1
-                        cabeceras = [cabecera.find('th').text.strip() for cabecera in especificaciones]
 
-                        datos = [dato.find('td').text.strip() for dato in especificaciones]
+                        cabeceras = CambioCaracteresRaros('th', especificaciones)
+                        datos = CambioCaracteresRaros('td', especificaciones)
 
                         datosOrdenados = []
                         unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol')
@@ -197,9 +235,7 @@ while True:
                             df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
                             df.loc[df.shape[0] - 1, 'Precio'] = precio
                             df.loc[df.shape[0] - 1, 'Link'] = articulo
-
                             print(len(df))
-                            df['Precio'] = df['Precio'].astype(int)
                     else:
                         print(' ')
                         print('Artículo sin precio. Pasando al siguiente...')
@@ -237,6 +273,7 @@ while True:
         print('Abortando ejecución...')
         break
 
+df['Precio'] = df['Precio'].astype(int)
 
 try:
     df.to_csv(str(nombreArchivoCSV), index=False, encoding='iso-8859-1')
