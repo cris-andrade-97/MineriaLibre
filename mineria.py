@@ -8,14 +8,21 @@ HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gec
 
 busqueda = input('Ingrese su búsqueda: ')
 
-# opcionCondicion = input('Ingrese una opción de condición de artículo: 0, 1 o 2: ')
-'''
-0: Nuevos y Usados
-1: Sólo Nuevos
-2: Sólo Usados
-'''
-nombreArchivoCSV = busqueda + '.csv'
-nombreArchivoXLSX = busqueda + '.xlsx'
+opcion = ''
+
+while True:
+    print('')
+    print('0: Nuevos y Usados')
+    print('1: Sólo Nuevos')
+    print('2: Sólo Usados')
+    print('')
+    opcion = input('Ingrese una opción de condición de artículos: 0, 1 o 2: ')
+    if opcion == '0' or opcion == '1' or opcion == '2':
+        break
+    else:
+        print('')
+        print('Su opción no está contemplada. Intente nuevamente.')
+
 
 ultimaPagina = False
 primerRegistro = True
@@ -45,6 +52,8 @@ limiteTimeoutsArticulo = 0
 limiteTimeoutsGeneral = 0
 limiteStatus400 = 0
 
+linksArticulos = []
+
 page = None
 
 tiempo_inicio = time.time()
@@ -58,7 +67,9 @@ def CambioCaracteresRaros(tag, specs):
             .replace('├Ī', 'á')
             .replace('รก', 'á')
             .replace('Ć”', 'á')
+            .replace('√°', 'á')
             .replace('├®', 'é')
+            .replace('ĂŠ', 'é')
             .replace('Ć©', 'é')
             .replace('รฉ', 'é')
             .replace('ûˋ', 'é')
@@ -71,6 +82,7 @@ def CambioCaracteresRaros(tag, specs):
             .replace('├Ł', 'í')
             .replace('√≠', 'í')
             .replace('Ã­', 'í')
+            .replace('Ă­', 'í')
             .replace('├│', 'ó')
             .replace('Ăł', 'ó')
             .replace('รณ', 'ó')
@@ -81,13 +93,17 @@ def CambioCaracteresRaros(tag, specs):
             .replace('Ćŗ', 'ú')
             .replace('Ãš', 'ú')
             .replace('รบ', 'ú')
+            .replace('├║', 'ú')
             .replace('├ü', 'Á')
             .replace('Ć', 'Á')
             .replace('û', 'Á')
+            .replace('Ă', 'Á')
             .replace('√Å', 'Á')
+            .replace('ร', 'Á')
             .replace('┬░', '°')
             .replace('ô¯', '°')
             .replace('ยฐ', '°')
+            .replace('Â°', '°')
             .replace('├▒', 'ñ')
             .replace('Ă±', 'ñ')
             .replace('Ć±', 'ñ')
@@ -95,6 +111,7 @@ def CambioCaracteresRaros(tag, specs):
             .replace('Ãą', 'ñ')
             .replace('รฑ', 'ñ')
             .replace('ûÝ', 'ñ')
+            .replace('Ăą', 'ñ')
             for fila in specs]
 
 
@@ -145,6 +162,26 @@ while True:
 
             soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
 
+            if primerRegistro:
+                if opcion != '0':
+                    if opcion == '1':
+                        try:
+                            soloNuevos = str(soup.find('a', {'aria-label': 'Nuevo', 'class': 'ui-search-link'})['href'])
+                            page = requests.get(soloNuevos, headers=HEADER, timeout=5)
+                            soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
+                        except:
+                            print('No hay artículos nuevos en su búsqueda, volviendo a la opción "0" por default...')
+                            opcion = '0'
+                    else:
+                        try:
+                            soloUsados = str(soup.find('a', {'aria-label': 'Usado', 'class': 'ui-search-link'})['href'])
+                            page = requests.get(soloUsados, headers=HEADER, timeout=5)
+                            soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
+                        except:
+                            print('No hay artículos nuevos en su búsqueda, volviendo a la opción "0" por default...')
+                            opcion = '0'
+                    time.sleep(1)
+
             if calculandoTiempoEstimado:
                 calculandoTiempoEstimado = False
                 try:
@@ -174,22 +211,23 @@ while True:
                 especificaciones = []
 
                 while True:
-                    while limiteTimeoutsArticulo < 5:
-                        timeoutException = False
-                        try:
-                            page = requests.get(articulo, headers=HEADER, timeout=5)
-                            limiteTimeoutsArticulo = 0
-                            limiteTimeoutsGeneral = 0
-                            break
-                        except:
-                            timeoutException = True
-                            limiteTimeoutsArticulo += 1
-                            print(' ')
-                            print('No fue posible realizar la solicitud del artículo.')
-                            print('Intento ' + str(limiteTimeoutsArticulo) + ' de 5')
-                        time.sleep(1)
 
                     if not timeoutException:
+                        while limiteTimeoutsArticulo < 5:
+                            timeoutException = False
+                            try:
+                                page = requests.get(articulo, headers=HEADER, timeout=5)
+                                limiteTimeoutsArticulo = 0
+                                limiteTimeoutsGeneral = 0
+                                break
+                            except:
+                                timeoutException = True
+                                limiteTimeoutsArticulo += 1
+                                print(' ')
+                                print('No fue posible realizar la solicitud del artículo.')
+                                print('Intento ' + str(limiteTimeoutsArticulo) + ' de 5')
+                            time.sleep(1)
+
                         soup = BeautifulSoup(page.content, 'html.parser')
                         try:
                             precio = int(
@@ -284,9 +322,18 @@ while True:
         print('Abortando ejecución...')
         break
 
-df['Precio'] = df['Precio'].astype(int)
 
-df.to_excel(str(nombreArchivoXLSX), index=False)
+nombreArchivo = ''
+
+if len(df) > 0:
+    df['Precio'] = df['Precio'].astype(int)
+    if opcion == '0':
+        nombreArchivo = busqueda + ' - Nuevos y Usados'
+    elif opcion == '1':
+        nombreArchivo = busqueda + ' - Sólo Nuevos'
+    elif opcion == '2':
+        nombreArchivo = busqueda + ' - Sólo Usados'
+    df.to_excel(str(nombreArchivo+'.xlsx'), index=False)
 
 segundos = time.time() - tiempo_inicio
 
