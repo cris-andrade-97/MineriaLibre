@@ -3,6 +3,9 @@ import numpy as np
 from bs4 import BeautifulSoup
 import requests
 import time
+import warnings
+
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"}
 
@@ -160,24 +163,22 @@ while True:
             soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
 
             if primerRegistro:
-                if opcion != '0':
-                    if opcion == '1':
-                        try:
-                            soloNuevos = str(soup.find('a', {'aria-label': 'Nuevo', 'class': 'ui-search-link'})['href'])
-                            page = requests.get(soloNuevos, headers=HEADER, timeout=5)
-                            soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
-                        except:
-                            print('No hay artículos nuevos en su búsqueda, volviendo a la opción "0" por default...')
-                            opcion = '0'
-                    else:
-                        try:
-                            soloUsados = str(soup.find('a', {'aria-label': 'Usado', 'class': 'ui-search-link'})['href'])
-                            page = requests.get(soloUsados, headers=HEADER, timeout=5)
-                            soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
-                        except:
-                            print('No hay artículos nuevos en su búsqueda, volviendo a la opción "0" por default...')
-                            opcion = '0'
-                    time.sleep(1)
+                if opcion == '1':
+                    try:
+                        page = requests.get(str(soup.find('a', {'aria-label': 'Nuevo', 'class': 'ui-search-link'})['href']), headers=HEADER, timeout=5)
+                        soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
+                        time.sleep(1)
+                    except:
+                        print('No hay artículos nuevos en su búsqueda, volviendo a la opción "0" por default...')
+                        opcion = '0'
+                elif opcion == '2':
+                    try:
+                        page = requests.get(str(soup.find('a', {'aria-label': 'Usado', 'class': 'ui-search-link'})['href']), headers=HEADER, timeout=5)
+                        soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
+                        time.sleep(1)
+                    except:
+                        print('No hay artículos usados en su búsqueda, volviendo a la opción "0" por default...')
+                        opcion = '0'
 
                 cantidadPaginas = 0
 
@@ -187,28 +188,36 @@ while True:
                 except:
                     cantidadPaginas = 1
 
+                cantidadArticulos = int(str(soup.find('span', class_='ui-search-search-result__quantity-results')
+                                            .text.strip()).replace(' resultados', '')
+                                        .replace('.', ''))
+
                 print(' ')
-                print('Hay aproximadamente', str((cantidadPaginas * 48)), 'artículos en la búsqueda.')
-                print('Están distribuidos en', cantidadPaginas, 'páginas.')
+                if cantidadArticulos < (49 * cantidadPaginas):
+                    print('Hay exactamente', str(cantidadArticulos), 'artículos.')
+                else:
+                    cantidadArticulos = 49 * cantidadPaginas
+                    print('Hay aproximadamente', str(cantidadArticulos), 'artículos.')
+
                 print('Puede traerlos todos o parte de ellos.')
 
                 while True:
-
+                    print(' ')
                     print('Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y',
-                          str(cantidadPaginas * 48), ':')
+                          str(cantidadArticulos), ':')
                     try:
                         print(' ')
                         limiteArticulos = int(input())
-                        if 1 <= limiteArticulos <= (cantidadPaginas * 48):
-                            tiempoEstimado = (int(limiteArticulos / 48) + limiteArticulos) * 2
+                        if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
+                            tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 2.66
                             break
-                        elif limiteArticulos == 0:
-                            tiempoEstimado = (cantidadPaginas + (cantidadPaginas * 48)) * 2
+                        elif 1 <= limiteArticulos < cantidadArticulos:
+                            tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 2.66
                             break
                         else:
                             print('Opción fuera de rango. Intente nuevamente.')
                     except:
-                        print('Sólo se admiten números enteros. Intente nuevamente.')
+                        print('Sólo se admiten números. Intente nuevamente.')
 
                 tiempo_inicio = time.time()
                 print('-----------------------------------------------')
@@ -226,45 +235,47 @@ while True:
                                                                  'shops__items-group-details ui-search-link')
                               if 'click1' not in str(x['href'])]
 
+            if limiteArticulos != 0 and limiteArticulos < len(linksArticulos) and cantidadPaginas == 1:
+                linksArticulos = linksArticulos[0:limiteArticulos]
+
             for articulo in linksArticulos:
                 hayPrecio = True
                 precio = 0
                 especificaciones = []
 
                 while True:
-                    if not timeoutException:
-                        while limiteTimeoutsArticulo < 5:
-                            timeoutException = False
-                            try:
-                                page = requests.get(articulo, headers=HEADER, timeout=5)
-                                limiteTimeoutsArticulo = 0
-                                limiteTimeoutsGeneral = 0
-                                break
-                            except:
-                                timeoutException = True
-                                limiteTimeoutsArticulo += 1
-                                print(' ')
-                                print('No fue posible realizar la solicitud del artículo.')
-                                print('Intento ' + str(limiteTimeoutsArticulo) + ' de 5')
-                            time.sleep(1)
-
-                        soup = BeautifulSoup(page.content, 'html.parser')
+                    while limiteTimeoutsArticulo < 3:
+                        timeoutException = False
                         try:
-                            precio = int(
-                                str(soup.find('span', class_='andes-money-amount__fraction').text.strip()).replace('.',
-                                                                                                                   ''))
-                        except:
-                            hayPrecio = False
+                            page = requests.get(articulo, headers=HEADER, timeout=5)
+                            limiteTimeoutsArticulo = 0
+                            limiteTimeoutsGeneral = 0
                             break
+                        except:
+                            timeoutException = True
+                            limiteTimeoutsArticulo += 1
+                            print(' ')
+                            print('No fue posible realizar la solicitud del artículo.')
+                            print('Intento ' + str(limiteTimeoutsArticulo) + ' de 3')
+                        time.sleep(1)
 
+                    if not timeoutException:
+                        soup = BeautifulSoup(page.content, 'html.parser')
                         especificaciones = soup.find_all('tr', class_='andes-table__row')
-
                         if len(especificaciones) > 0:
                             break
                     else:
                         break
 
                 if not timeoutException:
+                    try:
+                        precio = int(
+                            str(soup.find('span', class_='andes-money-amount__fraction').text.strip()).replace(
+                                '.',
+                                ''))
+                    except:
+                        hayPrecio = False
+
                     if hayPrecio:
                         articulosRecabados += 1
 
@@ -311,9 +322,9 @@ while True:
                 else:
                     limiteTimeoutsGeneral += 1
                     print(' ')
-                    if limiteTimeoutsGeneral == 5:
+                    if limiteTimeoutsGeneral == 3:
                         print('Límite de timeouts consecutivos alcanzado para el artículo.')
-                        print('Cinco artículos consecutivos han tenido excepciones de timeout.')
+                        print('Tres artículos consecutivos han tenido excepciones de timeout.')
                         print('Abortando ejecución...')
                         abortarEjecucion = True
                         break
@@ -322,7 +333,6 @@ while True:
                         print('Límite de timeouts consecutivos alcanzado para el artículo. Pasando al siguiente...')
 
                 if limiteArticulos > 0 and limiteArticulos == len(df):
-                    segundos = time.time() - tiempo_inicio
                     abortarEjecucion = True
                     break
         else:
@@ -330,16 +340,17 @@ while True:
             print(' ')
             print('No fue posible realizar la solicitud.')
             print('Status: ' + str(page.status_code))
-            if limiteStatus400 == 5:
-                print('Quinto intento realizado.')
+            if limiteStatus400 == 3:
+                print('Tercer intento realizado.')
                 print('Abortando ejecución...')
                 abortarEjecucion = True
                 break
             else:
-                print('Intento ' + str(limiteStatus400) + ' de 5')
-    elif limiteTimeoutsGeneral == 5:
+                print('Intento ' + str(limiteStatus400) + ' de 3')
+    elif limiteTimeoutsGeneral == 3:
         print(' ')
         print('Límite de timeouts consecutivos alcanzado.')
+        print('Tercer intento realizado.')
         try:
             print('Status: ' + str(page.status_code))
         except:
@@ -347,7 +358,7 @@ while True:
         print('Abortando ejecución...')
         break
 
-
+print(' ')
 if len(df) > 0:
     nombreArchivo = ''
     df['Precio'] = df['Precio'].astype(int)
@@ -358,6 +369,11 @@ if len(df) > 0:
     elif opcion == '2':
         nombreArchivo = busqueda + ' - Sólo Usados'
     df.to_excel(str(nombreArchivo + '.xlsx'), index=False)
+    print('Planilla de cálculos creada correctamente.')
+else:
+    print('Planilla de cálculos no fue creada. Cantidad nula de registros.')
+
+segundos = time.time() - tiempo_inicio
 
 print(' ')
 print('Páginas visitadas:', paginasVisitadas)
