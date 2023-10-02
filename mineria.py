@@ -6,9 +6,32 @@ import time
 
 HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"}
 
-busqueda = input('Ingrese su búsqueda: ')
+ultimaPagina = False
+primerRegistro = True
+hayPrecio = True
+timeoutException = False
+abortarEjecucion = False
+calculandoTiempoEstimado = True
 
 opcion = ''
+
+cantidadArticulosAprox = 0
+limiteArticulos = 100
+paginasVisitadas = 0
+articulosRecabados = 0
+tiempoEstimado = 0
+limiteTimeoutsArticulo = 0
+limiteTimeoutsGeneral = 0
+limiteStatus400 = 0
+tiempo_inicio = 0
+segundos = 0
+
+linksArticulos = []
+
+page = None
+
+busqueda = input('Ingrese su búsqueda: ')
+
 
 while True:
     print('')
@@ -24,39 +47,9 @@ while True:
         print('Su opción no está contemplada. Intente nuevamente.')
 
 
-ultimaPagina = False
-primerRegistro = True
-hayPrecio = True
-timeoutException = False
-abortarEjecucion = False
-calculandoTiempoEstimado = True
-
 df = pd.DataFrame()
 
 URL = 'https://listado.mercadolibre.com.ar/' + busqueda.replace(' ', '-').lower() + '#D[A:' + busqueda.lower() + ']'
-
-'''
-page = requests.get(url=URL, headers=HEADER)
-
-BeautifulSoup(page.content, 'html.parser')
-
-def condicionArticuloURL(opcion):
-    if opcion == 0:
-        return
-'''
-
-paginasVisitadas = 0
-articulosRecabados = 0
-tiempoEstimado = 0
-limiteTimeoutsArticulo = 0
-limiteTimeoutsGeneral = 0
-limiteStatus400 = 0
-
-linksArticulos = []
-
-page = None
-
-tiempo_inicio = time.time()
 
 
 def CambioCaracteresRaros(tag, specs):
@@ -104,6 +97,8 @@ def CambioCaracteresRaros(tag, specs):
             .replace('ô¯', '°')
             .replace('ยฐ', '°')
             .replace('Â°', '°')
+            .replace('Ā°', '°')
+            .replace('¬∞', '°')
             .replace('├▒', 'ñ')
             .replace('Ă±', 'ñ')
             .replace('Ć±', 'ñ')
@@ -112,6 +107,8 @@ def CambioCaracteresRaros(tag, specs):
             .replace('รฑ', 'ñ')
             .replace('ûÝ', 'ñ')
             .replace('Ăą', 'ñ')
+            .replace('┬▓', '²')
+            .replace('ยฒ', '²')
             for fila in specs]
 
 
@@ -182,14 +179,38 @@ while True:
                             opcion = '0'
                     time.sleep(1)
 
-            if calculandoTiempoEstimado:
-                calculandoTiempoEstimado = False
+                cantidadPaginas = 0
+
                 try:
                     cantidadPaginas = int(str(soup.find('li', class_='andes-pagination__page-count')
                                               .text.strip()).replace('de ', ''))
                 except:
                     cantidadPaginas = 1
-                tiempoEstimado = (cantidadPaginas + cantidadPaginas * 48) * 2
+
+                print(' ')
+                print('Hay aproximadamente', str((cantidadPaginas * 48)), 'artículos en la búsqueda.')
+                print('Están distribuidos en', cantidadPaginas, 'páginas.')
+                print('Puede traerlos todos o parte de ellos.')
+
+                while True:
+
+                    print('Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y',
+                          str(cantidadPaginas * 48), ':')
+                    try:
+                        print(' ')
+                        limiteArticulos = int(input())
+                        if 1 <= limiteArticulos <= (cantidadPaginas * 48):
+                            tiempoEstimado = (int(limiteArticulos / 48) + limiteArticulos) * 2
+                            break
+                        elif limiteArticulos == 0:
+                            tiempoEstimado = (cantidadPaginas + (cantidadPaginas * 48)) * 2
+                            break
+                        else:
+                            print('Opción fuera de rango. Intente nuevamente.')
+                    except:
+                        print('Sólo se admiten números enteros. Intente nuevamente.')
+
+                tiempo_inicio = time.time()
                 print('-----------------------------------------------')
                 print('Tiempo estimado calculado:', SegundosAHHMMSS(int(tiempoEstimado)))
                 print('-----------------------------------------------')
@@ -211,7 +232,6 @@ while True:
                 especificaciones = []
 
                 while True:
-
                     if not timeoutException:
                         while limiteTimeoutsArticulo < 5:
                             timeoutException = False
@@ -300,6 +320,11 @@ while True:
                     else:
                         limiteTimeoutsArticulo = 0
                         print('Límite de timeouts consecutivos alcanzado para el artículo. Pasando al siguiente...')
+
+                if limiteArticulos > 0 and limiteArticulos == len(df):
+                    segundos = time.time() - tiempo_inicio
+                    abortarEjecucion = True
+                    break
         else:
             limiteStatus400 += 1
             print(' ')
@@ -323,9 +348,8 @@ while True:
         break
 
 
-nombreArchivo = ''
-
 if len(df) > 0:
+    nombreArchivo = ''
     df['Precio'] = df['Precio'].astype(int)
     if opcion == '0':
         nombreArchivo = busqueda + ' - Nuevos y Usados'
@@ -333,9 +357,7 @@ if len(df) > 0:
         nombreArchivo = busqueda + ' - Sólo Nuevos'
     elif opcion == '2':
         nombreArchivo = busqueda + ' - Sólo Usados'
-    df.to_excel(str(nombreArchivo+'.xlsx'), index=False)
-
-segundos = time.time() - tiempo_inicio
+    df.to_excel(str(nombreArchivo + '.xlsx'), index=False)
 
 print(' ')
 print('Páginas visitadas:', paginasVisitadas)
