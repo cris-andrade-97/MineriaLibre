@@ -215,9 +215,11 @@ while True:
                         print('Sólo se admiten números. Intente nuevamente.')
 
                 tiempo_inicio = time.time()
+                print(' ')
                 print('-----------------------------------------------')
                 print('Tiempo estimado calculado:', SegundosAHHMMSS(int(tiempoEstimado)))
                 print('-----------------------------------------------')
+                print(' ')
 
             try:
                 URL = str(soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link',
@@ -290,7 +292,7 @@ while True:
                             datos.append(articulo)
                             df = pd.DataFrame(columns=cabeceras)
                             df.loc[df.shape[0]] = datos
-                            print(len(df))
+                            # print(len(df))
                         else:
                             if set(cabeceras).issubset(df.columns):
                                 if len(cabeceras) == len(df.columns):
@@ -310,7 +312,7 @@ while True:
                             df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
                             df.loc[df.shape[0] - 1, 'Precio'] = precio
                             df.loc[df.shape[0] - 1, 'Link'] = articulo
-                            print(len(df))
+                            # print(len(df))
 
                         datos = []
                         cabeceras = []
