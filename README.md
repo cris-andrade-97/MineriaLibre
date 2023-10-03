@@ -24,7 +24,7 @@ Abra la terminal de su sistema operativo y siga los pasos:
 
 <b>Arch Linux</b>: 
 - ```sudo pacman -Syu```
-- ```sudo pacman -S python3 python-pip```
+- ```sudo pacman -S python python-pip```
 - ```pip install pandas numpy bs4 odfpy openpyxl```
 
 <b>Debian</b>: 
