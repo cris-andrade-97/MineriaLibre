@@ -10,6 +10,8 @@ MineriaWeb es un algoritmo dedicado a extraer datos de los artículos en Mercado
 - bs4
 
 ## Instrucciones de instalación
+Abra la terminal de su sistema operativo y siga los pasos:
+
 <b>Ubuntu y derivados</b>: 
 - ```sudo apt update```
 - ```sudo apt install python python3-pip```
