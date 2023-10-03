@@ -360,12 +360,7 @@ print(' ')
 if len(df) > 0:
     nombreArchivo = ''
     df = df.sample(frac=1, random_state=np.random.randint(low=0, high=101)).reset_index(drop=True)
-    for column in df.columns:
-        try:
-            df[column] = df[column].astype(int)
-        except:
-            pass
-
+    df['Precio'] = df['Precio'].astype(int)
     if opcion == '0':
         nombreArchivo = busqueda + ' - Nuevos y Usados'
     elif opcion == '1':
