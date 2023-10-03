@@ -1,4 +1,4 @@
-# MineriaWeb
+# Minería Web en MercadoLibre
 
 ## Introducción
 MineriaWeb es un algoritmo dedicado a extraer datos de los artículos en MercadoLibre y en base a una búsqueda cualquiera. Se adapta satisfactoriamente a cada artículo para almacenar todos o la mayoría de los registros en una planilla de cálculo.
