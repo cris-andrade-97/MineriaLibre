@@ -18,8 +18,9 @@ calculandoTiempoEstimado = True
 
 opcion = ''
 
+cantidadPaginas = 0
 cantidadArticulosAprox = 0
-limiteArticulos = 100
+limiteArticulos = 0
 paginasVisitadas = 0
 articulosRecabados = 0
 tiempoEstimado = 0
@@ -27,14 +28,14 @@ limiteTimeoutsArticulo = 0
 limiteTimeoutsGeneral = 0
 limiteStatus400 = 0
 tiempo_inicio = 0
-segundos = 0
+tiempoTotal = 0
 
+df = pd.DataFrame()
 linksArticulos = []
 
 page = None
 
 busqueda = input('Ingrese su búsqueda: ')
-
 
 while True:
     print('')
@@ -48,9 +49,6 @@ while True:
     else:
         print('')
         print('Su opción no está contemplada. Intente nuevamente.')
-
-
-df = pd.DataFrame()
 
 URL = 'https://listado.mercadolibre.com.ar/' + busqueda.replace(' ', '-').lower() + '#D[A:' + busqueda.lower() + ']'
 
@@ -115,20 +113,22 @@ def CambioCaracteresRaros(tag, specs):
             for fila in specs]
 
 
-def AsignacionDatosOrdenados():
-    for column in df.columns:
+def AsignacionDatosOrdenados(listaCabeceras, listaDatos, dataFrame):
+    listaIndices = []
+    listaOrdenada = []
+    for column in dataFrame.columns:
         try:
-            indicesCabeceras.append(cabeceras.index(column))
+            listaIndices.append(listaCabeceras.index(column))
         except:
-            indicesCabeceras.append(-1)
+            listaIndices.append(-1)
 
-    for index in indicesCabeceras:
+    for index in listaIndices:
         if index != -1:
-            datosOrdenados.append(datos[index])
+            listaOrdenada.append(listaDatos[index])
         else:
-            datosOrdenados.append(np.nan)
+            listaOrdenada.append(np.nan)
 
-    df.loc[df.shape[0]] = datosOrdenados
+    dataFrame.loc[dataFrame.shape[0]] = listaOrdenada
 
 
 def SegundosAHHMMSS(segundo):
@@ -157,31 +157,26 @@ while True:
     time.sleep(1)
     if page is not None:
         if page.status_code == 200:
+            limiteStatus400 = 0
             limiteTimeoutsArticulo = 0
             paginasVisitadas += 1
 
             soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
 
             if primerRegistro:
-                if opcion == '1':
+                if opcion != '0':
+                    condicion = 'Nuevo' if opcion == '1' else 'Usado'
                     try:
-                        page = requests.get(str(soup.find('a', {'aria-label': 'Nuevo', 'class': 'ui-search-link'})['href']), headers=HEADER, timeout=5)
+                        page = requests.get(
+                            str(soup.find('a', {'aria-label': condicion, 'class': 'ui-search-link'})['href']),
+                            headers=HEADER, timeout=5)
                         soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
                         time.sleep(1)
                     except:
-                        print('No hay artículos nuevos en su búsqueda, volviendo a la opción "0" por default...')
+                        print('No hay artículos con esa condición en su búsqueda, '
+                              'volviendo a la opción "0" por default...')
                         opcion = '0'
-                elif opcion == '2':
-                    try:
-                        page = requests.get(str(soup.find('a', {'aria-label': 'Usado', 'class': 'ui-search-link'})['href']), headers=HEADER, timeout=5)
-                        soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
-                        time.sleep(1)
-                    except:
-                        print('No hay artículos usados en su búsqueda, volviendo a la opción "0" por default...')
-                        opcion = '0'
-
-                cantidadPaginas = 0
-
+                condicion = None
                 try:
                     cantidadPaginas = int(str(soup.find('li', class_='andes-pagination__page-count')
                                               .text.strip()).replace('de ', ''))
@@ -209,10 +204,10 @@ while True:
                         print(' ')
                         limiteArticulos = int(input())
                         if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
-                            tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 2.66
+                            tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 2.05
                             break
                         elif 1 <= limiteArticulos < cantidadArticulos:
-                            tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 2.66
+                            tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 2.05
                             break
                         else:
                             print('Opción fuera de rango. Intente nuevamente.')
@@ -239,10 +234,9 @@ while True:
                 linksArticulos = linksArticulos[0:limiteArticulos]
 
             for articulo in linksArticulos:
-                hayPrecio = True
+                unidadMonetaria = ''
                 precio = 0
                 especificaciones = []
-
                 while True:
                     while limiteTimeoutsArticulo < 3:
                         timeoutException = False
@@ -273,25 +267,26 @@ while True:
                             str(soup.find('span', class_='andes-money-amount__fraction').text.strip()).replace(
                                 '.',
                                 ''))
-                    except:
-                        hayPrecio = False
-
-                    if hayPrecio:
-                        articulosRecabados += 1
-
-                        cabeceras = CambioCaracteresRaros('th', especificaciones)
-                        datos = CambioCaracteresRaros('td', especificaciones)
-
-                        datosOrdenados = []
                         unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol')
                                               .text.strip())
+                    except:
+                        precio = 0
+
+                    if precio != 0:
+                        soup = None
+                        page = None
+                        articulosRecabados += 1
+                        cabeceras = CambioCaracteresRaros('th', especificaciones)
+                        datos = CambioCaracteresRaros('td', especificaciones)
+                        especificaciones = []
+
                         if primerRegistro:
                             primerRegistro = False
                             cabeceras.append('Unidad Monetaria')
                             cabeceras.append('Precio')
                             cabeceras.append('Link')
                             datos.append('ARS' if unidadMonetaria == '$' else 'U$S')
-                            datos.append(precio)
+                            datos.append(str(precio))
                             datos.append(articulo)
                             df = pd.DataFrame(columns=cabeceras)
                             df.loc[df.shape[0]] = datos
@@ -302,20 +297,23 @@ while True:
                                     indicesCabeceras = [cabeceras.index(column) for column in df.columns]
                                     datosOrdenados = [datos[i] for i in indicesCabeceras]
                                     df.loc[df.shape[0]] = datosOrdenados
-                                elif len(cabeceras) < len(df.columns):
                                     indicesCabeceras = []
-                                    AsignacionDatosOrdenados()
+                                    datosOrdenados = []
+                                elif len(cabeceras) < len(df.columns):
+                                    AsignacionDatosOrdenados(cabeceras, datos, df)
                             else:
-                                indicesCabeceras = []
                                 for cabecera in cabeceras:
                                     if cabecera not in df.columns:
                                         df[cabecera] = np.nan
-                                AsignacionDatosOrdenados()
+                                AsignacionDatosOrdenados(cabeceras, datos, df)
 
                             df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
                             df.loc[df.shape[0] - 1, 'Precio'] = precio
                             df.loc[df.shape[0] - 1, 'Link'] = articulo
                             print(len(df))
+
+                        datos = []
+                        cabeceras = []
                     else:
                         print(' ')
                         print('Artículo sin precio. Pasando al siguiente...')
@@ -341,7 +339,7 @@ while True:
             print('No fue posible realizar la solicitud.')
             print('Status: ' + str(page.status_code))
             if limiteStatus400 == 3:
-                print('Tercer intento realizado.')
+                print('Tercer intento consecutivo realizado.')
                 print('Abortando ejecución...')
                 abortarEjecucion = True
                 break
@@ -361,7 +359,13 @@ while True:
 print(' ')
 if len(df) > 0:
     nombreArchivo = ''
-    df['Precio'] = df['Precio'].astype(int)
+    df = df.sample(frac=1, random_state=np.random.randint(low=0, high=101)).reset_index(drop=True)
+    for column in df.columns:
+        try:
+            df[column] = df[column].astype(int)
+        except:
+            pass
+
     if opcion == '0':
         nombreArchivo = busqueda + ' - Nuevos y Usados'
     elif opcion == '1':
@@ -373,9 +377,9 @@ if len(df) > 0:
 else:
     print('Planilla de cálculos no fue creada. Cantidad nula de registros.')
 
-segundos = time.time() - tiempo_inicio
+tiempoTotal = time.time() - tiempo_inicio
 
 print(' ')
 print('Páginas visitadas:', paginasVisitadas)
 print('Artículos recabados:', articulosRecabados)
-print('Tiempo transcurrido:', SegundosAHHMMSS(segundos))
+print('Tiempo transcurrido:', SegundosAHHMMSS(tiempoTotal))
