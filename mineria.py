@@ -201,7 +201,6 @@ while True:
                     print('Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y',
                           str(cantidadArticulos), ':')
                     try:
-                        print(' ')
                         limiteArticulos = int(input())
                         if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
                             tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 2.05
@@ -228,8 +227,7 @@ while True:
                 ultimaPagina = True
 
             linksArticulos = [str(x['href'])
-                              for x in soup.find_all('a', class_='ui-search-item__group__element '
-                                                                 'shops__items-group-details ui-search-link')
+                              for x in soup.find_all('a', class_='ui-search-item__group__element ui-search-link')
                               if 'click1' not in str(x['href'])]
 
             if limiteArticulos != 0 and limiteArticulos < len(linksArticulos) and cantidadPaginas == 1:
@@ -292,7 +290,7 @@ while True:
                             datos.append(articulo)
                             df = pd.DataFrame(columns=cabeceras)
                             df.loc[df.shape[0]] = datos
-                            # print(len(df))
+                            print(len(df))
                         else:
                             if set(cabeceras).issubset(df.columns):
                                 if len(cabeceras) == len(df.columns):
@@ -312,7 +310,7 @@ while True:
                             df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
                             df.loc[df.shape[0] - 1, 'Precio'] = precio
                             df.loc[df.shape[0] - 1, 'Link'] = articulo
-                            # print(len(df))
+                            print(len(df))
 
                         datos = []
                         cabeceras = []
