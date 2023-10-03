@@ -14,7 +14,7 @@ Abra la terminal de su sistema operativo y siga los pasos:
 
 <b>Ubuntu y derivados</b>: 
 - ```sudo apt update```
-- ```sudo apt install python python3-pip```
+- ```sudo apt install python3 python3-pip```
 - ```pip install pandas numpy bs4 odfpy openpyxl```
 
 <b>Fedora y derivados</b>: 
