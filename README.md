@@ -19,11 +19,6 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - ```sudo apt install python3 python3-pip git```
 - ```pip install pandas numpy bs4 odfpy openpyxl```
 
-<b>Fedora y derivados</b>: 
-- ```sudo dnf update```
-- ```sudo dnf install python3 python3-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl```
-
 <b>Arch Linux</b>: 
 - ```sudo pacman -Syu```
 - ```sudo pacman -S python python-pip git```
@@ -32,11 +27,19 @@ Abra la terminal de su sistema operativo y siga los pasos:
 <b>Debian</b>: 
 - ```sudo apt-get update```
 - ```sudo apt-get install python3 python-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl```
+- ```pip install pandas numpy bs4 odfpy openpyxl --break-system-packages```
 
 <b>Microsoft Windows</b>:
 - Instale la última versión de <a href='https://www.python.org/downloads/'>Python3</a> (3.12 al momento de redactar este readme)
-- Instale la última versión de <a href='https://git-scm.com/download/win'>Git</a>
+- Instale la última versión de <a href='https://git-scm.com/download/win'>Git</a> (2.42.0 al momento de redactar este readme)
 - ```curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py```
 - ```python get-pip.py```
 - ```pip install pandas numpy bs4 odfpy openpyxl```
+
+## Ejecución
+Abra la terminal de su sistema operativo y siga los pasos:
+
+- Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```.
+- Llame a la carpeta del proyecto con ```cd MineriaLibre```
+- Dependiendo de su sistema operativo, ejecute el programa con ```python mineria.py``` o con ```python3 mineria.py```.
+
