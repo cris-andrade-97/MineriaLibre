@@ -39,7 +39,7 @@ Abra la terminal de su sistema operativo y siga los pasos:
 ## Ejecución
 Abra la terminal de su sistema operativo y siga los pasos:
 
-- Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```.
+- Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```
 - Llame a la carpeta del proyecto con ```cd MineriaLibre```
-- Dependiendo de su sistema operativo, ejecute el programa con ```python mineria.py``` o con ```python3 mineria.py```.
+- Dependiendo de su sistema operativo, ejecute el programa con ```python mineria.py``` o con ```python3 mineria.py```
 
