@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import requests
 import time
 import warnings
+import os
 
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
@@ -358,6 +359,10 @@ while True:
 
 print(' ')
 if len(df) > 0:
+
+    if not os.path.exists('./resultados'):
+        os.makedirs('./resultados')
+
     nombreArchivo = ''
     df = df.sample(frac=1, random_state=np.random.randint(low=0, high=101)).reset_index(drop=True)
     df['Precio'] = df['Precio'].astype(int)
@@ -367,7 +372,9 @@ if len(df) > 0:
         nombreArchivo = busqueda + ' - Sólo Nuevos'
     elif opcion == '2':
         nombreArchivo = busqueda + ' - Sólo Usados'
-    df.to_excel(str(nombreArchivo + '.xlsx'), index=False)
+
+    opcion = f'./resultados/'+str(nombreArchivo + '.xlsx')
+    df.to_excel(opcion, index=False)
     print('Planilla de cálculos creada correctamente.')
 else:
     print('Planilla de cálculos no fue creada. Cantidad nula de registros.')
