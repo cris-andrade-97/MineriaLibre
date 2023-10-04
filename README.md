@@ -1,7 +1,7 @@
 # MineriaLibre
 
 ## Introducción
-MineriaWeb es un algoritmo dedicado a extraer datos de los artículos en MercadoLibre y en base a una búsqueda cualquiera. Se adapta satisfactoriamente a cada artículo para almacenar todos o la mayoría de los registros en una planilla de cálculo.
+MineriaLibre es un algoritmo dedicado a extraer datos de los artículos en MercadoLibre y en base a una búsqueda cualquiera. Se adapta satisfactoriamente a cada artículo para almacenar todos o la mayoría de los registros en una planilla de cálculo.
 
 ## Tecnologías usadas
 - PyCharm IDE
@@ -19,7 +19,7 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - ```sudo apt install python3 python3-pip git```
 - ```pip install pandas numpy bs4 odfpy openpyxl```
 
-<b>Arch Linux</b>: 
+<b>Arch Linux y derivados</b>: 
 - ```sudo pacman -Syu```
 - ```sudo pacman -S python python-pip git```
 - ```pip install pandas numpy bs4 odfpy openpyxl```
