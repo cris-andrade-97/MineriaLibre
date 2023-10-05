@@ -30,8 +30,8 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - ```pip install pandas numpy bs4 odfpy openpyxl --break-system-packages```
 
 <b>Microsoft Windows</b>:
-- Instale la última versión de <a href='https://www.python.org/downloads/'>Python3</a> (3.12 al momento de redactar este readme)
-- Instale la última versión de <a href='https://git-scm.com/download/win'>Git</a> (2.42.0 al momento de redactar este readme)
+- Descargue e instale la última versión de <a href='https://www.python.org/downloads/'>Python3</a> (3.12 al momento de redactar este readme)
+- Descargue e instale la última versión de <a href='https://git-scm.com/download/win'>Git</a> (2.42.0 al momento de redactar este readme)
 - ```curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py```
 - ```python get-pip.py```
 - ```pip install pandas numpy bs4 odfpy openpyxl```
