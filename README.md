@@ -34,7 +34,7 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - Descargue e instale la última versión de <a href='https://git-scm.com/download/win'>Git</a> (2.42.0 al momento de redactar este readme)
 - ```curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py```
 - ```python get-pip.py```
-- ```pip install pandas numpy bs4 odfpy openpyxl```
+- ```pip install pandas numpy bs4 odfpy openpyxl requests```
 
 ## Ejecución
 Abra la terminal de su sistema operativo y siga los pasos:
