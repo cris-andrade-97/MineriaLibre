@@ -1,3 +1,5 @@
+from types import NoneType
+
 import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
@@ -124,7 +126,7 @@ def AsignacionDatosOrdenados(listaCabeceras, listaDatos, dataFrame):
     for column in dataFrame.columns:
         try:
             listaIndices.append(listaCabeceras.index(column))
-        except:
+        except ValueError:
             listaIndices.append(-1)
 
     for index in listaIndices:
@@ -146,219 +148,227 @@ def SegundosAHHMMSS(segundo):
     stringSegundos = str(round(segundo, 2)) if segundo >= 10 else str("0" + str(round(segundo, 2)))
     return str(stringHoras + ':' + stringMinutos + ':' + stringSegundos)
 
+try:
+    while True:
+        if ultimaPagina or abortarEjecucion:
+            break
+        try:
+            page = requests.get(url=URL, headers=HEADER, timeout=5)
+            limiteTimeoutsGeneral = 0
+        except requests.exceptions.ConnectionError or requests.exceptions.Timeout:
+            print(' ')
+            print('Excepción de timeout.')
+            limiteTimeoutsGeneral += 1
+            print('Intento ' + str(limiteTimeoutsGeneral) + ' de 5')
+        time.sleep(1)
+        if page is not None:
+            if page.status_code == 200:
+                limiteStatus400 = 0
+                limiteTimeoutsArticulo = 0
+                paginasVisitadas += 1
 
-while True:
-    if ultimaPagina or abortarEjecucion:
-        break
+                soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
 
-    try:
-        page = requests.get(url=URL, headers=HEADER, timeout=5)
-        limiteTimeoutsGeneral = 0
-    except:
-        print(' ')
-        print('Excepción de timeout.')
-        limiteTimeoutsGeneral += 1
-        print('Intento ' + str(limiteTimeoutsGeneral) + ' de 5')
-    time.sleep(1)
-    if page is not None:
-        if page.status_code == 200:
-            limiteStatus400 = 0
-            limiteTimeoutsArticulo = 0
-            paginasVisitadas += 1
+                if primerRegistro:
+                    if opcion != '0':
+                        condicion = 'Nuevo' if opcion == '1' else 'Usado'
 
-            soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
-
-            if primerRegistro:
-                if opcion != '0':
-                    condicion = 'Nuevo' if opcion == '1' else 'Usado'
-                    try:
-                        page = requests.get(
-                            str(soup.find('a', {'aria-label': condicion, 'class': 'ui-search-link'})['href']),
-                            headers=HEADER, timeout=5)
-                        soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
-                        time.sleep(1)
-                    except:
-                        print('No hay artículos con esa condición en su búsqueda, '
-                              'volviendo a la opción "0" por default...')
-                        opcion = '0'
-                condicion = None
-                try:
-                    cantidadPaginas = int(str(soup.find('li', class_='andes-pagination__page-count')
-                                              .text.strip()).replace('de ', ''))
-                except:
-                    cantidadPaginas = 1
-
-                cantidadArticulos = int(str(soup.find('span', class_='ui-search-search-result__quantity-results')
-                                            .text.strip()).replace(' resultados', '')
-                                        .replace('.', ''))
-
-                print(' ')
-                if cantidadArticulos < (49 * cantidadPaginas):
-                    print('Hay exactamente', str(cantidadArticulos), 'artículos con esa condición.')
-                else:
-                    cantidadArticulos = 49 * cantidadPaginas
-                    print('Hay aproximadamente', str(cantidadArticulos), 'artículos con esa condición.')
-
-                print('Puede traerlos todos o parte de ellos.')
-
-                while True:
-                    print(' ')
-                    anuncioCantidad = f'Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y {cantidadArticulos}: '
-                    try:
-                        limiteArticulos = int(input(anuncioCantidad))
-                        if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
-                            tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 3.5
-                            break
-                        elif 1 <= limiteArticulos < cantidadArticulos:
-                            tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 3.5
-                            break
-                        else:
-                            print('Opción fuera de rango. Intente nuevamente.')
-                    except:
-                        print('Sólo se admiten números. Intente nuevamente.')
-
-                tiempo_inicio = time.time()
-                print(' ')
-                print('-----------------------------------------------')
-                print('Tiempo estimado calculado:', SegundosAHHMMSS(int(tiempoEstimado)))
-                print('-----------------------------------------------')
-                print(' ')
-
-            try:
-                URL = str(soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link',
-                                    title='Siguiente')['href'])
-            except:
-                ultimaPagina = True
-
-            linksArticulos = [str(x['href'])
-                              for x in soup.find_all('a', class_='ui-search-item__group__element ui-search-link')
-                              if 'click1' not in str(x['href'])]
-
-            '''if limiteArticulos != 0 and limiteArticulos < len(linksArticulos) and cantidadPaginas == 1:
-                linksArticulos = linksArticulos[0:limiteArticulos]'''
-
-            for articulo in linksArticulos:
-                unidadMonetaria = ''
-                precio = 0
-                especificaciones = []
-                while True:
-                    while limiteTimeoutsArticulo < 3:
-                        timeoutException = False
                         try:
-                            page = requests.get(articulo, headers=HEADER, timeout=5)
-                            limiteTimeoutsArticulo = 0
-                            limiteTimeoutsGeneral = 0
-                            break
-                        except:
-                            timeoutException = True
-                            limiteTimeoutsArticulo += 1
+                            page = requests.get(
+                                str(soup.find('a', {'aria-label': condicion, 'class': 'ui-search-link'})['href']),
+                                headers=HEADER, timeout=5)
+                            soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
+                            time.sleep(1)
+                        except TypeError:
+                            print('No hay artículos con esa condición en su búsqueda, '
+                                  'volviendo a la opción "0" por default...')
+                            opcion = '0'
+
+                    condicion = None
+
+                    try:
+                        cantidadPaginas = int(str(soup.find('li', class_='andes-pagination__page-count')
+                                                  .text.strip()).replace('de ', ''))
+                    except AttributeError:
+                        cantidadPaginas = 1
+
+                    cantidadArticulos = int(str(soup.find('span', class_='ui-search-search-result__quantity-results')
+                                                .text.strip()).replace(' resultados', '')
+                                            .replace('.', ''))
+
+                    print(' ')
+                    if cantidadArticulos < (49 * cantidadPaginas):
+                        print('Hay exactamente', str(cantidadArticulos), 'artículos con esa condición.')
+                    else:
+                        cantidadArticulos = 49 * cantidadPaginas
+                        print('Hay aproximadamente', str(cantidadArticulos), 'artículos con esa condición.')
+
+                    print('Puede traerlos todos o parte de ellos.')
+
+                    while True:
+                        print(' ')
+                        anuncioCantidad = f'Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y {cantidadArticulos}: '
+                        limiteArticulos = int(input(anuncioCantidad))
+                        try:
+                            if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
+                                tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 1.8
+                                break
+                            elif 1 <= limiteArticulos < cantidadArticulos:
+                                tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 1.8
+                                break
+                            else:
+                                print('Opción fuera de rango. Intente nuevamente.')
+                        except ValueError:
                             print(' ')
-                            print('No fue posible realizar la solicitud del artículo.')
-                            print('Intento ' + str(limiteTimeoutsArticulo) + ' de 3')
-                        time.sleep(1)
+                            print('Sólo se admiten números. Intente nuevamente.')
+
+                    tiempo_inicio = time.time()
+                    print(' ')
+                    print('-----------------------------------------------')
+                    print('Tiempo estimado calculado:', SegundosAHHMMSS(int(tiempoEstimado)))
+                    print('-----------------------------------------------')
+                    print(' ')
+
+                try:
+                    URL = str(soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link',
+                                        title='Siguiente')['href'])
+                except TypeError:
+                    ultimaPagina = True
+
+                linksArticulos = [str(x['href'])
+                                  for x in soup.find_all('a', class_='ui-search-item__group__element ui-search-link')
+                                  if 'click1' not in str(x['href'])]
+
+                '''if limiteArticulos != 0 and limiteArticulos < len(linksArticulos) and cantidadPaginas == 1:
+                    linksArticulos = linksArticulos[0:limiteArticulos]'''
+
+                for articulo in linksArticulos:
+                    unidadMonetaria = ''
+                    precio = 0
+                    especificaciones = []
+                    while True:
+                        while limiteTimeoutsArticulo < 3:
+                            timeoutException = False
+                            try:
+                                page = requests.get(articulo, headers=HEADER, timeout=5)
+                                limiteTimeoutsArticulo = 0
+                                limiteTimeoutsGeneral = 0
+                                break
+                            except requests.exceptions.ConnectionError or requests.exceptions.Timeout:
+                                timeoutException = True
+                                limiteTimeoutsArticulo += 1
+                                print(' ')
+                                print('No fue posible realizar la solicitud del artículo.')
+                                print('Intento ' + str(limiteTimeoutsArticulo) + ' de 3')
+                            time.sleep(1)
+
+                        if not timeoutException:
+                            soup = BeautifulSoup(page.content, 'html.parser')
+                            especificaciones = soup.find_all('tr', class_='andes-table__row')
+                            if len(especificaciones) > 0:
+                                break
+                        else:
+                            break
 
                     if not timeoutException:
-                        soup = BeautifulSoup(page.content, 'html.parser')
-                        especificaciones = soup.find_all('tr', class_='andes-table__row')
-                        if len(especificaciones) > 0:
-                            break
-                    else:
-                        break
+                        try:
+                            precio = int(
+                                str(soup.find('span', class_='andes-money-amount__fraction').text.strip()).replace(
+                                    '.',
+                                    ''))
+                            unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol')
+                                                  .text.strip())
+                        except TypeError:
+                            precio = 0
 
-                if not timeoutException:
-                    try:
-                        precio = int(
-                            str(soup.find('span', class_='andes-money-amount__fraction').text.strip()).replace(
-                                '.',
-                                ''))
-                        unidadMonetaria = str(soup.find('span', class_='andes-money-amount__currency-symbol')
-                                              .text.strip())
-                    except:
-                        precio = 0
+                        if precio != 0:
+                            soup = None
+                            page = None
+                            articulosRecabados += 1
+                            cabeceras = CambioCaracteresRaros('th', especificaciones)
+                            datos = CambioCaracteresRaros('td', especificaciones)
+                            especificaciones = []
 
-                    if precio != 0:
-                        soup = None
-                        page = None
-                        articulosRecabados += 1
-                        cabeceras = CambioCaracteresRaros('th', especificaciones)
-                        datos = CambioCaracteresRaros('td', especificaciones)
-                        especificaciones = []
-
-                        if primerRegistro:
-                            primerRegistro = False
-                            cabeceras.append('Unidad Monetaria')
-                            cabeceras.append('Precio')
-                            cabeceras.append('Link')
-                            datos.append('ARS' if unidadMonetaria == '$' else 'U$S')
-                            datos.append(str(precio))
-                            datos.append(articulo)
-                            df = pd.DataFrame(columns=cabeceras)
-                            df.loc[df.shape[0]] = datos
-                            print(len(df))
-                        else:
-                            if set(cabeceras).issubset(df.columns):
-                                if len(cabeceras) == len(df.columns):
-                                    indicesCabeceras = [cabeceras.index(column) for column in df.columns]
-                                    datosOrdenados = [datos[i] for i in indicesCabeceras]
-                                    df.loc[df.shape[0]] = datosOrdenados
-                                    indicesCabeceras = []
-                                    datosOrdenados = []
-                                elif len(cabeceras) < len(df.columns):
-                                    AsignacionDatosOrdenados(cabeceras, datos, df)
+                            if primerRegistro:
+                                primerRegistro = False
+                                cabeceras.append('Unidad Monetaria')
+                                cabeceras.append('Precio')
+                                cabeceras.append('Link')
+                                datos.append('ARS' if unidadMonetaria == '$' else 'U$S')
+                                datos.append(str(precio))
+                                datos.append(articulo)
+                                df = pd.DataFrame(columns=cabeceras)
+                                df.loc[df.shape[0]] = datos
+                                print(len(df))
                             else:
-                                for cabecera in cabeceras:
-                                    if cabecera not in df.columns:
-                                        df[cabecera] = np.nan
-                                AsignacionDatosOrdenados(cabeceras, datos, df)
+                                if set(cabeceras).issubset(df.columns):
+                                    if len(cabeceras) == len(df.columns):
+                                        indicesCabeceras = [cabeceras.index(column) for column in df.columns]
+                                        datosOrdenados = [datos[i] for i in indicesCabeceras]
+                                        df.loc[df.shape[0]] = datosOrdenados
+                                        indicesCabeceras = []
+                                        datosOrdenados = []
+                                    elif len(cabeceras) < len(df.columns):
+                                        AsignacionDatosOrdenados(cabeceras, datos, df)
+                                else:
+                                    for cabecera in cabeceras:
+                                        if cabecera not in df.columns:
+                                            df[cabecera] = np.nan
+                                    AsignacionDatosOrdenados(cabeceras, datos, df)
 
-                            df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
-                            df.loc[df.shape[0] - 1, 'Precio'] = precio
-                            df.loc[df.shape[0] - 1, 'Link'] = articulo
-                            print(len(df))
+                                df.loc[df.shape[0] - 1, 'Unidad Monetaria'] = 'ARS' if unidadMonetaria == '$' else 'U$S'
+                                df.loc[df.shape[0] - 1, 'Precio'] = precio
+                                df.loc[df.shape[0] - 1, 'Link'] = articulo
+                                print(len(df))
 
-                        datos = []
-                        cabeceras = []
+                            datos = []
+                            cabeceras = []
+                        else:
+                            print(' ')
+                            print('Artículo sin precio. Pasando al siguiente...')
                     else:
+                        limiteTimeoutsGeneral += 1
                         print(' ')
-                        print('Artículo sin precio. Pasando al siguiente...')
-                else:
-                    limiteTimeoutsGeneral += 1
-                    print(' ')
-                    if limiteTimeoutsGeneral == 3:
-                        print('Límite de timeouts consecutivos alcanzado para el artículo.')
-                        print('Tres artículos consecutivos han tenido excepciones de timeout.')
-                        print('Abortando ejecución...')
+                        if limiteTimeoutsGeneral == 3:
+                            print('Límite de timeouts consecutivos alcanzado para el artículo.')
+                            print('Tres artículos consecutivos han tenido excepciones de timeout.')
+                            print('Abortando ejecución...')
+                            abortarEjecucion = True
+                            break
+                        else:
+                            limiteTimeoutsArticulo = 0
+                            print('Límite de timeouts consecutivos alcanzado para el artículo. Pasando al siguiente...')
+
+                    if limiteArticulos > 0 and limiteArticulos == len(df):
                         abortarEjecucion = True
                         break
-                    else:
-                        limiteTimeoutsArticulo = 0
-                        print('Límite de timeouts consecutivos alcanzado para el artículo. Pasando al siguiente...')
-
-                if limiteArticulos > 0 and limiteArticulos == len(df):
+            else:
+                limiteStatus400 += 1
+                print(' ')
+                print('No fue posible realizar la solicitud.')
+                print('Status: ' + str(page.status_code))
+                if limiteStatus400 == 3:
+                    print('Tercer intento consecutivo realizado.')
+                    print('Abortando ejecución...')
                     abortarEjecucion = True
                     break
-        else:
-            limiteStatus400 += 1
+                else:
+                    print('Intento ' + str(limiteStatus400) + ' de 3')
+        elif limiteTimeoutsGeneral == 3:
             print(' ')
-            print('No fue posible realizar la solicitud.')
-            print('Status: ' + str(page.status_code))
-            if limiteStatus400 == 3:
-                print('Tercer intento consecutivo realizado.')
-                print('Abortando ejecución...')
-                abortarEjecucion = True
-                break
-            else:
-                print('Intento ' + str(limiteStatus400) + ' de 3')
-    elif limiteTimeoutsGeneral == 3:
-        print(' ')
-        print('Límite de timeouts consecutivos alcanzado.')
-        print('Tercer intento realizado.')
-        try:
-            print('Status: ' + str(page.status_code))
-        except:
-            print('Sin conexión.')
-        print('Abortando ejecución...')
-        break
+            print('Límite de timeouts consecutivos alcanzado.')
+            print('Tercer intento realizado.')
+            try:
+                print('Status: ' + str(page.status_code))
+            except AttributeError:
+                print('Sin conexión.')
+            print('Abortando ejecución...')
+            break
+
+except KeyboardInterrupt:
+    print(' ')
+    print('Programa interrumpido manualmente.')
+    print('Abortando ejecución...')
 
 print(' ')
 if len(df) > 0:
