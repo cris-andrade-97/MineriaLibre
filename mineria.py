@@ -38,8 +38,12 @@ page = None
 
 busqueda = input('Ingrese su búsqueda: ')
 
+print(' ')
+
 while True:
     print('')
+    print('Seleccione una condición de producto:')
+    print(' ')
     print('0: Nuevos y Usados')
     print('1: Sólo Nuevos')
     print('2: Sólo Usados')
@@ -190,24 +194,23 @@ while True:
 
                 print(' ')
                 if cantidadArticulos < (49 * cantidadPaginas):
-                    print('Hay exactamente', str(cantidadArticulos), 'artículos.')
+                    print('Hay exactamente', str(cantidadArticulos), 'artículos con esa condición.')
                 else:
                     cantidadArticulos = 49 * cantidadPaginas
-                    print('Hay aproximadamente', str(cantidadArticulos), 'artículos.')
+                    print('Hay aproximadamente', str(cantidadArticulos), 'artículos con esa condición.')
 
                 print('Puede traerlos todos o parte de ellos.')
 
                 while True:
                     print(' ')
-                    print('Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y',
-                          str(cantidadArticulos), ':')
+                    anuncioCantidad = f'Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y {cantidadArticulos}: '
                     try:
-                        limiteArticulos = int(input())
+                        limiteArticulos = int(input(anuncioCantidad))
                         if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
-                            tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 2.05
+                            tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 3.5
                             break
                         elif 1 <= limiteArticulos < cantidadArticulos:
-                            tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 2.05
+                            tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 3.5
                             break
                         else:
                             print('Opción fuera de rango. Intente nuevamente.')
@@ -231,8 +234,8 @@ while True:
                               for x in soup.find_all('a', class_='ui-search-item__group__element ui-search-link')
                               if 'click1' not in str(x['href'])]
 
-            if limiteArticulos != 0 and limiteArticulos < len(linksArticulos) and cantidadPaginas == 1:
-                linksArticulos = linksArticulos[0:limiteArticulos]
+            '''if limiteArticulos != 0 and limiteArticulos < len(linksArticulos) and cantidadPaginas == 1:
+                linksArticulos = linksArticulos[0:limiteArticulos]'''
 
             for articulo in linksArticulos:
                 unidadMonetaria = ''
@@ -359,7 +362,6 @@ while True:
 
 print(' ')
 if len(df) > 0:
-
     if not os.path.exists('./resultados'):
         os.makedirs('./resultados')
 
@@ -375,12 +377,11 @@ if len(df) > 0:
 
     opcion = f'./resultados/'+str(nombreArchivo + '.xlsx')
     df.to_excel(opcion, index=False)
-    print('Planilla de cálculos creada correctamente.')
+    print(str(f'Planilla de cálculos "{nombreArchivo}.xlsx" creada correctamente en la carpeta "resultados".'))
 else:
     print('Planilla de cálculos no fue creada. Cantidad nula de registros.')
 
 tiempoTotal = time.time() - tiempo_inicio
-
 print(' ')
 print('Páginas visitadas:', paginasVisitadas)
 print('Artículos recabados:', articulosRecabados)
