@@ -12,15 +12,14 @@ HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/2010010
 
 ultimaPagina = False
 primerRegistro = True
-hayPrecio = True
 timeoutException = False
 abortarEjecucion = False
-calculandoTiempoEstimado = True
 
 opcion = ''
+busqueda = None
+page = None
 
 cantidadPaginas = 0
-cantidadArticulosAprox = 0
 limiteArticulos = 0
 paginasVisitadas = 0
 articulosRecabados = 0
@@ -32,30 +31,6 @@ tiempo_inicio = 0
 tiempoTotal = 0
 
 df = pd.DataFrame()
-linksArticulos = []
-
-page = None
-
-busqueda = input('Ingrese su búsqueda: ')
-
-print(' ')
-
-while True:
-    print('')
-    print('Seleccione una condición de producto:')
-    print(' ')
-    print('0: Nuevos y Usados')
-    print('1: Sólo Nuevos')
-    print('2: Sólo Usados')
-    print('')
-    opcion = input('Ingrese una opción de condición de artículos: 0, 1 o 2: ')
-    if opcion == '0' or opcion == '1' or opcion == '2':
-        break
-    else:
-        print('')
-        print('Su opción no está contemplada. Intente nuevamente.')
-
-URL = 'https://listado.mercadolibre.com.ar/' + busqueda.replace(' ', '-').lower() + '#D[A:' + busqueda.lower() + ']'
 
 
 def CambioCaracteresRaros(tag, specs):
@@ -147,6 +122,29 @@ def SegundosAHHMMSS(segundo):
     return str(stringHoras + ':' + stringMinutos + ':' + stringSegundos)
 
 try:
+    while busqueda is None:
+        busqueda = input('Ingrese su búsqueda: ')
+        print(' ')
+        if busqueda is None:
+            print('La búsqueda no puede ser nula. Intente nuevamente.')
+
+    while True:
+        print('')
+        print('Seleccione una condición de producto:')
+        print(' ')
+        print('0: Nuevos y Usados')
+        print('1: Sólo Nuevos')
+        print('2: Sólo Usados')
+        print('')
+        opcion = input('Ingrese una opción de condición de artículos: 0, 1 o 2: ')
+        if opcion == '0' or opcion == '1' or opcion == '2':
+            break
+        else:
+            print('')
+            print('Su opción no está contemplada. Intente nuevamente.')
+
+    URL = 'https://listado.mercadolibre.com.ar/' + busqueda.replace(' ', '-').lower() + '#D[A:' + busqueda.lower() + ']'
+
     while True:
         if ultimaPagina or abortarEjecucion:
             break
@@ -209,10 +207,10 @@ try:
                         limiteArticulos = int(input(anuncioCantidad))
                         try:
                             if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
-                                tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 1.8
+                                tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 2.9
                                 break
                             elif 1 <= limiteArticulos < cantidadArticulos:
-                                tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 1.8
+                                tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 2.9
                                 break
                             else:
                                 print('Opción fuera de rango. Intente nuevamente.')
@@ -236,9 +234,6 @@ try:
                 linksArticulos = [str(x['href'])
                                   for x in soup.find_all('a', class_='ui-search-item__group__element ui-search-link')
                                   if 'click1' not in str(x['href'])]
-
-                '''if limiteArticulos != 0 and limiteArticulos < len(linksArticulos) and cantidadPaginas == 1:
-                    linksArticulos = linksArticulos[0:limiteArticulos]'''
 
                 for articulo in linksArticulos:
                     unidadMonetaria = ''
@@ -371,10 +366,10 @@ except KeyboardInterrupt:
 print(' ')
 if len(df) > 0:
     if not os.path.exists('./resultados'):
+        print('Carpeta "resultados" creada en la raiz del proyecto.')
         os.makedirs('./resultados')
 
     nombreArchivo = ''
-    df = df.sample(frac=1, random_state=np.random.randint(low=0, high=101)).reset_index(drop=True)
     df['Precio'] = df['Precio'].astype(int)
     if opcion == '0':
         nombreArchivo = busqueda + ' - Nuevos y Usados'
