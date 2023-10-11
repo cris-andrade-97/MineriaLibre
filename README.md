@@ -18,7 +18,7 @@ Abra la terminal de su sistema operativo y siga los pasos:
 <b>Ubuntu y derivados</b>: 
 - ```sudo apt update```
 - ```sudo apt install python3 python3-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl pyqt5```
+- ```pip install pandas numpy bs4 openpyxl pyqt5```
 
 <b>Microsoft Windows</b>:
 - Descargue e instale la última versión de <a href='https://www.python.org/downloads/'>Python3</a> (3.12 al momento de redactar este readme)
@@ -26,7 +26,7 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - Abra la terminal de Windows con privilegios de administrador e ingrese los siguientes comandos en orden:
 	- ```curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py```
 	- ```python get-pip.py```
-	- ```pip install pandas numpy bs4 odfpy openpyxl requests pyqt5```
+	- ```pip install pandas numpy bs4 openpyxl requests pyqt5```
 
 ## Ejecución
 <b>Versión con interfaz gráfica</b>:
