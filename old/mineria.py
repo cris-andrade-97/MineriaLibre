@@ -227,7 +227,7 @@ try:
                     print(' ')
 
                 try:
-                    URL = str(soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link',
+                    URL = str(soup.find('a', class_='andes-pagination__link ui-search-link',
                                         title='Siguiente')['href'])
                 except TypeError:
                     ultimaPagina = True
