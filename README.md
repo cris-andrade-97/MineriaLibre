@@ -21,7 +21,6 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - ```pip install pandas numpy bs4 odfpy openpyxl pyqt5```
 
 <b>Microsoft Windows</b>:
-
 - Descargue e instale la última versión de <a href='https://www.python.org/downloads/'>Python3</a> (3.12 al momento de redactar este readme)
 - Descargue e instale la última versión de <a href='https://git-scm.com/download/win'>Git</a> (2.42.0 al momento de redactar este readme)
 - Abra la terminal de Windows con privilegios de administrador e ingrese los siguientes comandos en orden:
@@ -30,9 +29,15 @@ Abra la terminal de su sistema operativo y siga los pasos:
 	- ```pip install pandas numpy bs4 odfpy openpyxl requests pyqt5```
 
 ## Ejecución
-Abra la terminal de su sistema operativo con privilegios de administrador y siga los pasos:
-
+<b>Versión con interfaz gráfica</b>:
+- Abra la terminal de su sistema operativo con privilegios de administrador o con superusuario.
 - Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```
 - Llame a la carpeta del proyecto con ```cd MineriaLibre```
 - Ejecute el programa con ```python ./vistas/VentanaInicio.py```
+
+<b>Versión en línea de comandos</b>:
+- Abra la terminal de su sistema operativo con privilegios de administrador o con superusuario.
+- Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```
+- Llame a la carpeta del proyecto con ```cd MineriaLibre```
+- Ejecute el programa con ```python ./old/mineria.py```
 
