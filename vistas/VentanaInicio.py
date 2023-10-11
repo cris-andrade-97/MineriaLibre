@@ -7,11 +7,12 @@ class Ui_Busqueda(object):
     def __init__(self):
         self.soup = None
         self.busqueda = ''
+        self.opcion = ''
 
     def VentanaLimitador(self):
         self.ventana = QtWidgets.QMainWindow()
         app.closeAllWindows()
-        self.ui = Ui_LimitadorCantidad(self.soup[0], self.busqueda, app)
+        self.ui = Ui_LimitadorCantidad(self.soup[0], self.busqueda, app, self.opcion)
         self.ui.setupUi(self.ventana)
         self.ventana.show()
 
@@ -81,16 +82,15 @@ class Ui_Busqueda(object):
         QtCore.QMetaObject.connectSlotsByName(VentanaInicio)
 
     def AccionSiguiente(self):
-        opcion = ''
         if self.NuevoUsadoRB.isChecked():
-            opcion = '0'
+            self.opcion = '0'
         elif self.SoloNuevoRB.isChecked():
-            opcion = '1'
+            self.opcion = '1'
         elif self.SoloUsadoRB.isChecked():
-            opcion = '2'
+            self.opcion = '2'
 
         self.busqueda = self.BusquedaTextBox.text()
-        self.soup = mineria.BusquedaInicial(self.BusquedaTextBox.text(), opcion)
+        self.soup = mineria.BusquedaInicial(self.BusquedaTextBox.text(), self.opcion)
 
         if self.soup == 1:
             # popup

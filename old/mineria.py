@@ -5,6 +5,7 @@ import requests
 import time
 import warnings
 import os
+import openpyxl
 
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
@@ -381,6 +382,15 @@ if len(df) > 0:
     opcion = f'./resultados/'+str(nombreArchivo + '.xlsx')
     df.to_excel(opcion, index=False)
     print(str(f'Planilla de cálculos "{nombreArchivo}.xlsx" creada correctamente en la carpeta "resultados".'))
+
+    wb = openpyxl.load_workbook(filename=opcion)
+    ws = wb.active
+    for column_cells in ws.columns:
+        length = max(len(str(cell.value)) for cell in column_cells)
+        ws.column_dimensions[column_cells[0].column_letter].width = length * 1.15
+
+    wb.save(opcion)
+
 else:
     print('Planilla de cálculos no fue creada. Cantidad nula de registros.')
 

@@ -5,17 +5,18 @@ from Final import Ui_Final
 
 
 class Ui_LimitadorCantidad(object):
-    def __init__(self,soup, busqueda, app):
+    def __init__(self,soup, busqueda, app, opcion):
         self.soup = soup
         self.app = app
         self.busqueda = busqueda
         self.cantidad = 0
         self.limitador = 0
-        self.paginas = 0
+        # self.paginas = 0
+        self.opcion = opcion
 
     def VentanaFinal(self):
         self.ventanaFinal = QtWidgets.QMainWindow()
-        self.uiFinal = Ui_Final(self.busqueda, self.soup, self.limitador, self.app)
+        self.uiFinal = Ui_Final(self.busqueda, self.soup, self.limitador, self.app, self.opcion)
         self.uiFinal.setupUi(self.ventanaFinal)
         self.ventanaFinal.show()
 
@@ -109,8 +110,7 @@ class Ui_LimitadorCantidad(object):
     def CambiarLabels(self):
         cantidadArticulos =  mineria.CalcularCantidad(self.soup)
         self.cantidad = cantidadArticulos[0]
-        self.paginas = cantidadArticulos[1]
-
+        # self.paginas = cantidadArticulos[1]
         if cantidadArticulos[2]:
             self.CantidadArtLabel.setText(f'Hay exactamente {cantidadArticulos[0]} artículos con esa condición.')
         else:

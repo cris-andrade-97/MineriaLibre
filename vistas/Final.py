@@ -1,5 +1,7 @@
 import os
 import time
+
+import openpyxl
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import pandas as pd
@@ -8,7 +10,7 @@ import mineria
 
 class Ui_Final(object):
 
-    def __init__(self, busqueda, soup, limitador, app):
+    def __init__(self, busqueda, soup, limitador, app, opcion):
         self.app = app
         self.limitador = limitador
         self.tiempoInicial = time.time()
@@ -18,6 +20,7 @@ class Ui_Final(object):
         self.soup = soup
         self.URL = ''
         self.abortar = False
+        self.opcion = opcion
 
     def setupUi(self, Final):
         Final.setObjectName("Final")
@@ -108,14 +111,30 @@ class Ui_Final(object):
         self.TiempoTranscurLabel.setText(f'Tiempo transcurrido: {tiempo}')
 
         if not os.path.exists('../resultados'):
+            os.makedirs('../resultados')
             msg = QMessageBox()
             msg.setWindowTitle('Carpeta "resultados"')
             msg.setText('Carpeta resultados creada en la raiz del proyecto.')
             x = msg.exec_()
-            os.makedirs('../resultados')
+
+        if self.opcion == '0':
+            self.opcion = self.busqueda + ' - Nuevos y Usados.xlsx'
+        elif self.opcion == '1':
+            self.opcion = self.busqueda + ' - Sólo Nuevos.xlsx'
+        elif self.opcion == '2':
+            self.opcion = self.busqueda + ' - Sólo Usados.xlsx'
 
         self.dataFrame['Precio'] = self.dataFrame['Precio'].astype(int)
-        self.dataFrame.to_excel(str('../resultados/' + self.busqueda + '.xlsx'), index=False)
+        ruta = f'../resultados/' + self.opcion
+        self.dataFrame.to_excel(ruta, index=False)
+
+        wb = openpyxl.load_workbook(filename=ruta)
+        ws = wb.active
+        for column_cells in ws.columns:
+            length = max(len(str(cell.value)) for cell in column_cells)
+            ws.column_dimensions[column_cells[0].column_letter].width = length * 1.15
+
+        wb.save(ruta)
 
         self.SalirButton.setText(_translate("Final", "Salir"))
 
