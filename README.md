@@ -20,16 +20,6 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - ```sudo apt install python3 python3-pip git```
 - ```pip install pandas numpy bs4 odfpy openpyxl pyqt5```
 
-<b>Arch Linux y derivados</b>: 
-- ```sudo pacman -Syu```
-- ```sudo pacman -S python python-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl pyqt5```
-
-<b>Debian</b>: 
-- ```sudo apt-get update```
-- ```sudo apt-get install python3 python-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl pyqt5 --break-system-packages```
-
 <b>Microsoft Windows</b>:
 
 - Descargue e instale la última versión de <a href='https://www.python.org/downloads/'>Python3</a> (3.12 al momento de redactar este readme)
@@ -44,5 +34,5 @@ Abra la terminal de su sistema operativo con privilegios de administrador y siga
 
 - Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```
 - Llame a la carpeta del proyecto con ```cd MineriaLibre```
-- Dependiendo de su sistema operativo, ejecute el programa con ```python ./vistas/VentanaInicio.py``` o con ```python3 ./vistas/VentanaInicio.py```
+- Ejecute el programa con ```python ./vistas/VentanaInicio.py```
 
