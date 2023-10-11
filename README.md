@@ -10,6 +10,7 @@ MineriaLibre es un algoritmo dedicado a extraer datos de los artículos en Merca
 - bs4
 - Git
 - GitHub
+- PyQt5
 
 ## Instrucciones de instalación
 Abra la terminal de su sistema operativo y siga los pasos:
@@ -17,17 +18,17 @@ Abra la terminal de su sistema operativo y siga los pasos:
 <b>Ubuntu y derivados</b>: 
 - ```sudo apt update```
 - ```sudo apt install python3 python3-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl```
+- ```pip install pandas numpy bs4 odfpy openpyxl pyqt5```
 
 <b>Arch Linux y derivados</b>: 
 - ```sudo pacman -Syu```
 - ```sudo pacman -S python python-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl```
+- ```pip install pandas numpy bs4 odfpy openpyxl pyqt5```
 
 <b>Debian</b>: 
 - ```sudo apt-get update```
 - ```sudo apt-get install python3 python-pip git```
-- ```pip install pandas numpy bs4 odfpy openpyxl --break-system-packages```
+- ```pip install pandas numpy bs4 odfpy openpyxl pyqt5 --break-system-packages```
 
 <b>Microsoft Windows</b>:
 
@@ -36,12 +37,12 @@ Abra la terminal de su sistema operativo y siga los pasos:
 - Abra la terminal de Windows con privilegios de administrador e ingrese los siguientes comandos en orden:
 	- ```curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py```
 	- ```python get-pip.py```
-	- ```pip install pandas numpy bs4 odfpy openpyxl requests```
+	- ```pip install pandas numpy bs4 odfpy openpyxl requests pyqt5```
 
 ## Ejecución
-Abra la terminal de su sistema operativo y siga los pasos:
+Abra la terminal de su sistema operativo con privilegios de administrador y siga los pasos:
 
 - Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```
 - Llame a la carpeta del proyecto con ```cd MineriaLibre```
-- Dependiendo de su sistema operativo, ejecute el programa con ```python mineria.py``` o con ```python3 mineria.py```
+- Dependiendo de su sistema operativo, ejecute el programa con ```python ./vistas/VentanaInicio.py``` o con ```python3 ./vistas/VentanaInicio.py```
 
