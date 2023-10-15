@@ -90,33 +90,42 @@ class Ui_Busqueda(object):
             self.opcion = '2'
 
         self.busqueda = self.BusquedaTextBox.text()
-        self.soup = mineria.BusquedaInicial(self.BusquedaTextBox.text(), self.opcion)
 
-        if self.soup == 1:
-            # popup
+        if len(self.busqueda) == 0:
             msg = QMessageBox()
-            msg.setWindowTitle('Error de solicitud')
-            msg.setText('Revise su conexión a internet.')
-            x = msg.exec_()
-        elif self.soup == 0:
-            # popup
-            msg = QMessageBox()
-            msg.setWindowTitle('Error de solicitud')
-            msg.setText('La búsqueda no devolvió resultados.\nPruebe con otra búsqueda.')
+            msg.setWindowTitle('Búsqueda vacía')
+            msg.setText('No puede realizar una búsqueda vacía.\nPruebe con otra búsqueda.')
             x = msg.exec_()
         else:
-            if self.soup[1]:
+            self.soup = mineria.BusquedaInicial(self.BusquedaTextBox.text(), self.opcion)
+            if self.soup == 1:
+                # popup
                 msg = QMessageBox()
-                msg.setWindowTitle('Condición no disponible')
-                msg.setText('La búsqueda no tiene esa condición.\nVolviendo a "Nuevos y Usados" por default...')
+                msg.setWindowTitle('Error de solicitud')
+                msg.setText('Revise su conexión a internet.')
                 x = msg.exec_()
-                app.closeAllWindows()
-                self.VentanaLimitador()
-                # return soup[0]
+            elif self.soup == 0:
+                # popup
+                msg = QMessageBox()
+                msg.setWindowTitle('Error de solicitud')
+                msg.setText('La búsqueda no devolvió resultados.\nPruebe con otra búsqueda.')
+                x = msg.exec_()
             else:
-                # return soup[0]
-                app.closeAllWindows()
-                self.VentanaLimitador()
+                if self.soup[1]:
+                    msg = QMessageBox()
+                    msg.setWindowTitle('Condición no disponible')
+                    msg.setText('La búsqueda no tiene esa condición.\nVolviendo a "Nuevos y Usados" por default...')
+                    x = msg.exec_()
+                    app.closeAllWindows()
+                    self.VentanaLimitador()
+                    # return soup[0]
+                else:
+                    # return soup[0]
+                    app.closeAllWindows()
+                    self.VentanaLimitador()
+
+
+
 
 
     def retranslateUi(self, MineriaLibre):
