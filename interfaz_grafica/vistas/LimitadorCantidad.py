@@ -18,7 +18,7 @@ class Espera(QWidget):
         super().__init__()
         self.setWindowTitle("Espere")
         self.setFixedSize(525, 150)
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint)
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setBold(True)
@@ -59,7 +59,7 @@ class Ui_LimitadorCantidad(object):
 
     def setupUi(self, LimitadorCantidad):
         LimitadorCantidad.setObjectName("LimitadorCantidad")
-        LimitadorCantidad.resize(556, 388)
+        LimitadorCantidad.setFixedSize(556, 388)
         self.centralwidget = QtWidgets.QWidget(LimitadorCantidad)
         self.centralwidget.setObjectName("centralwidget")
         self.LimitadorTextBox = QtWidgets.QLineEdit(self.centralwidget)

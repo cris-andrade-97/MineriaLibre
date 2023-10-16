@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import QMessageBox, QWidget, QLabel
 # import pandas as pd
 # from interfaz_grafica.lib import mineria
 from lib import mineria
+# from interfaz_grafica.vistas.Busqueda import Ui_Busqueda
+
 
 class Ui_Final(object):
     def __init__(self, busqueda, opcion, dataFrame, paginas, app, tiempo_inicial):
@@ -21,7 +23,7 @@ class Ui_Final(object):
 
     def setupUi(self, Final):
         Final.setObjectName("Final")
-        Final.resize(648, 374)
+        Final.setFixedSize(648, 374)
         self.centralwidget = QtWidgets.QWidget(Final)
         self.centralwidget.setObjectName("centralwidget")
         self.FinalLabel = QtWidgets.QLabel(self.centralwidget)
@@ -35,7 +37,7 @@ class Ui_Final(object):
         self.FinalLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.FinalLabel.setObjectName("FinalLabel")
         self.SalirButton = QtWidgets.QPushButton(self.centralwidget)
-        self.SalirButton.setGeometry(QtCore.QRect(260, 290, 111, 31))
+        self.SalirButton.setGeometry(QtCore.QRect(520, 290, 111, 31))
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         self.SalirButton.setFont(font)
@@ -69,6 +71,13 @@ class Ui_Final(object):
         self.ResultadosLabel.setGeometry(QtCore.QRect(18, 80, 611, 20))
         self.ResultadosLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.ResultadosLabel.setObjectName("ResultadosLabel")
+        self.VolverInicioButton = QtWidgets.QPushButton(self.centralwidget)
+        self.VolverInicioButton.clicked.connect(self.AccionInicio)
+        self.VolverInicioButton.setGeometry(QtCore.QRect(20, 290, 111, 31))
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu")
+        self.VolverInicioButton.setFont(font)
+        self.VolverInicioButton.setObjectName("VolverInicioButton")
         Final.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(Final)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 481, 22))
@@ -83,6 +92,14 @@ class Ui_Final(object):
     def AccionSalir(self):
         self.app.closeAllWindows()
 
+    def AccionInicio(self):
+        from vistas.Busqueda import Ui_Busqueda
+        self.app.closeAllWindows()
+        self.ventana = QtWidgets.QMainWindow()
+        self.inicio = Ui_Busqueda(self.app)
+        self.inicio.setupUi(self.ventana)
+        self.ventana.show()
+
     def retranslateUi(self, Final):
         self.app.closeAllWindows()
         tiempo = mineria.SegundosAHHMMSS(time.time() - self.tiempoInicial)
@@ -93,7 +110,7 @@ class Ui_Final(object):
         self.PagVisitadasLabel.setText(f'Páginas recorridas: {self.paginasDeArticulos}')
         self.ArtRecabadosLabel.setText(f'Artículos recabados: {len(self.dataFrame)}')
         self.TiempoTranscurLabel.setText(f'Tiempo transcurrido: {tiempo}')
-
+        self.VolverInicioButton.setText(_translate("Busqueda", "Volver al inico"))
         if not os.path.exists('../resultados'):
             os.makedirs('../resultados')
             msg = QMessageBox()

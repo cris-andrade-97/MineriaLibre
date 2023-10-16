@@ -19,10 +19,10 @@ class Ui_Busqueda(object):
         self.ui.setupUi(self.ventana)
         self.ventana.show()
 
-    def setupUi(self, VentanaInicio):
-        VentanaInicio.setObjectName("VentanaInicio")
-        VentanaInicio.resize(387, 388)
-        self.centralwidget = QtWidgets.QWidget(VentanaInicio)
+    def setupUi(self, Busqueda):
+        Busqueda.setObjectName("Busqueda")
+        Busqueda.setFixedSize(387, 388)
+        self.centralwidget = QtWidgets.QWidget(Busqueda)
         self.centralwidget.setObjectName("centralwidget")
         self.BusquedaTextBox = QtWidgets.QLineEdit(self.centralwidget)
         self.BusquedaTextBox.setGeometry(QtCore.QRect(20, 80, 351, 21))
@@ -72,17 +72,17 @@ class Ui_Busqueda(object):
         self.Siguiente_1_Button.setFont(font)
         self.Siguiente_1_Button.setObjectName("Siguiente_1_Button")
         self.Siguiente_1_Button.clicked.connect(self.AccionSiguiente)
-        VentanaInicio.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(VentanaInicio)
+        Busqueda.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(Busqueda)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 387, 22))
         self.menubar.setObjectName("menubar")
-        VentanaInicio.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(VentanaInicio)
+        Busqueda.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(Busqueda)
         self.statusbar.setObjectName("statusbar")
-        VentanaInicio.setStatusBar(self.statusbar)
+        Busqueda.setStatusBar(self.statusbar)
 
-        self.retranslateUi(VentanaInicio)
-        QtCore.QMetaObject.connectSlotsByName(VentanaInicio)
+        self.retranslateUi(Busqueda)
+        QtCore.QMetaObject.connectSlotsByName(Busqueda)
 
     def AccionSiguiente(self):
 
@@ -126,12 +126,12 @@ class Ui_Busqueda(object):
                     self.app.closeAllWindows()
                     self.VentanaLimitador()
 
-    def retranslateUi(self, MineriaLibre):
+    def retranslateUi(self, Busqueda):
         _translate = QtCore.QCoreApplication.translate
-        MineriaLibre.setWindowTitle(_translate("VentanaInicio", "Búsqueda Inicial"))
-        self.BusquedaLabel.setText(_translate("VentanaInicio", "Ingrese su búsqueda aquí:"))
-        self.SelecCondLabel.setText(_translate("VentanaInicio", "Seleccione la condición de los productos:"))
-        self.NuevoUsadoRB.setText(_translate("VentanaInicio", "Todos"))
-        self.SoloNuevoRB.setText(_translate("VentanaInicio", "Sólo Nuevos"))
-        self.SoloUsadoRB.setText(_translate("VentanaInicio", "Sólo Usados"))
-        self.Siguiente_1_Button.setText(_translate("VentanaInicio", "Siguiente"))
+        Busqueda.setWindowTitle(_translate("Busqueda", "Búsqueda Inicial"))
+        self.BusquedaLabel.setText(_translate("Busqueda", "Ingrese su búsqueda aquí:"))
+        self.SelecCondLabel.setText(_translate("Busqueda", "Seleccione la condición de los productos:"))
+        self.NuevoUsadoRB.setText(_translate("Busqueda", "Todos"))
+        self.SoloNuevoRB.setText(_translate("Busqueda", "Sólo Nuevos"))
+        self.SoloUsadoRB.setText(_translate("Busqueda", "Sólo Usados"))
+        self.Siguiente_1_Button.setText(_translate("Busqueda", "Siguiente"))
