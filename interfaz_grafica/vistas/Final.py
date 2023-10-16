@@ -1,11 +1,10 @@
 import os
 import time
-
 import openpyxl
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import pandas as pd
-import mineria
+from lib import mineria
 
 
 class Ui_Final(object):
@@ -114,7 +113,7 @@ class Ui_Final(object):
             os.makedirs('../resultados')
             msg = QMessageBox()
             msg.setWindowTitle('Carpeta "resultados"')
-            msg.setText('Carpeta resultados creada en la raiz del proyecto.')
+            msg.setText('Carpeta resultados creada en la raiz.')
             x = msg.exec_()
 
         if self.opcion == '0':

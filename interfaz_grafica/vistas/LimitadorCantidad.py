@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-import mineria
-from Final import Ui_Final
+from lib import mineria
+from vistas.Final import Ui_Final
 
 
 class Ui_LimitadorCantidad(object):
@@ -11,7 +11,6 @@ class Ui_LimitadorCantidad(object):
         self.busqueda = busqueda
         self.cantidad = 0
         self.limitador = 0
-        # self.paginas = 0
         self.opcion = opcion
 
     def VentanaFinal(self):
@@ -88,11 +87,11 @@ class Ui_LimitadorCantidad(object):
         QtCore.QMetaObject.connectSlotsByName(LimitadorCantidad)
 
     def BotonComenzar(self):
-        limitadorAprobado = False
+
         try:
             self.limitador = int(self.LimitadorTextBox.text())
             if mineria.LimitadorCantidad(cantidadArticulos=self.cantidad, limiteArticulos=self.limitador):
-                limitadorAprobado = True
+                self.VentanaFinal()
             else:
                 msg = QMessageBox()
                 msg.setWindowTitle('Valor fuera de rango')
@@ -104,13 +103,9 @@ class Ui_LimitadorCantidad(object):
             msg.setText('Sólo se admiten números en este campo.\nIntente nuevamente.')
             x = msg.exec_()
 
-        if limitadorAprobado:
-            self.VentanaFinal()
-
     def CambiarLabels(self):
         cantidadArticulos =  mineria.CalcularCantidad(self.soup)
         self.cantidad = cantidadArticulos[0]
-        # self.paginas = cantidadArticulos[1]
         if cantidadArticulos[2]:
             self.CantidadArtLabel.setText(f'Hay exactamente {cantidadArticulos[0]} artículos con esa condición.')
         else:

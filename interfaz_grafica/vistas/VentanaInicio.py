@@ -1,18 +1,20 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-import mineria
+from vistas.LimitadorCantidad import Ui_LimitadorCantidad
+from lib import mineria
 
-from LimitadorCantidad import Ui_LimitadorCantidad
+
 class Ui_Busqueda(object):
-    def __init__(self):
+    def __init__(self, app):
         self.soup = None
         self.busqueda = ''
         self.opcion = ''
+        self.app = app
 
     def VentanaLimitador(self):
         self.ventana = QtWidgets.QMainWindow()
-        app.closeAllWindows()
-        self.ui = Ui_LimitadorCantidad(self.soup[0], self.busqueda, app, self.opcion)
+        self.app.closeAllWindows()
+        self.ui = Ui_LimitadorCantidad(self.soup[0], self.busqueda, self.app, self.opcion)
         self.ui.setupUi(self.ventana)
         self.ventana.show()
 
@@ -82,12 +84,6 @@ class Ui_Busqueda(object):
         QtCore.QMetaObject.connectSlotsByName(VentanaInicio)
 
     def AccionSiguiente(self):
-        if self.NuevoUsadoRB.isChecked():
-            self.opcion = '0'
-        elif self.SoloNuevoRB.isChecked():
-            self.opcion = '1'
-        elif self.SoloUsadoRB.isChecked():
-            self.opcion = '2'
 
         self.busqueda = self.BusquedaTextBox.text()
 
@@ -97,6 +93,13 @@ class Ui_Busqueda(object):
             msg.setText('No puede realizar una búsqueda vacía.\nPruebe con otra búsqueda.')
             x = msg.exec_()
         else:
+            if self.NuevoUsadoRB.isChecked():
+                self.opcion = '0'
+            elif self.SoloNuevoRB.isChecked():
+                self.opcion = '1'
+            elif self.SoloUsadoRB.isChecked():
+                self.opcion = '2'
+
             self.soup = mineria.BusquedaInicial(self.BusquedaTextBox.text(), self.opcion)
             if self.soup == 1:
                 # popup
@@ -114,36 +117,20 @@ class Ui_Busqueda(object):
                 if self.soup[1]:
                     msg = QMessageBox()
                     msg.setWindowTitle('Condición no disponible')
-                    msg.setText('La búsqueda no tiene esa condición.\nVolviendo a "Nuevos y Usados" por default...')
+                    msg.setText('La búsqueda no tiene esa condición.\nVolviendo a "Todos" por default...')
                     x = msg.exec_()
-                    app.closeAllWindows()
+                    self.app.closeAllWindows()
                     self.VentanaLimitador()
-                    # return soup[0]
                 else:
-                    # return soup[0]
-                    app.closeAllWindows()
+                    self.app.closeAllWindows()
                     self.VentanaLimitador()
-
-
-
-
 
     def retranslateUi(self, MineriaLibre):
         _translate = QtCore.QCoreApplication.translate
         MineriaLibre.setWindowTitle(_translate("VentanaInicio", "Búsqueda Inicial"))
         self.BusquedaLabel.setText(_translate("VentanaInicio", "Ingrese su búsqueda aquí:"))
         self.SelecCondLabel.setText(_translate("VentanaInicio", "Seleccione la condición de los productos:"))
-        self.NuevoUsadoRB.setText(_translate("VentanaInicio", "Nuevos y Usados"))
+        self.NuevoUsadoRB.setText(_translate("VentanaInicio", "Todos"))
         self.SoloNuevoRB.setText(_translate("VentanaInicio", "Sólo Nuevos"))
         self.SoloUsadoRB.setText(_translate("VentanaInicio", "Sólo Usados"))
         self.Siguiente_1_Button.setText(_translate("VentanaInicio", "Siguiente"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    VentanaInicio = QtWidgets.QMainWindow()
-    ui = Ui_Busqueda()
-    ui.setupUi(VentanaInicio)
-    VentanaInicio.show()
-    sys.exit(app.exec_())

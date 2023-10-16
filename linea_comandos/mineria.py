@@ -17,8 +17,9 @@ timeoutException = False
 abortarEjecucion = False
 
 opcion = ''
-busqueda = None
+busqueda = ''
 page = None
+URL = ''
 
 cantidadPaginas = 0
 limiteArticulos = 0
@@ -123,28 +124,50 @@ def SegundosAHHMMSS(segundo):
     return str(stringHoras + ':' + stringMinutos + ':' + stringSegundos)
 
 try:
-    while busqueda is None:
-        busqueda = input('Ingrese su búsqueda: ')
-        print(' ')
-        if busqueda is None:
-            print('La búsqueda no puede ser nula. Intente nuevamente.')
+    while limiteTimeoutsGeneral < 3:
+        while busqueda == '':
+            print(' ')
+            busqueda = input('Ingrese su búsqueda: ')
+            if busqueda == '':
+                print(' ')
+                print('La búsqueda no puede ser nula. Intente nuevamente.')
+        try:
+            URL = 'https://listado.mercadolibre.com.ar/' + busqueda.replace(' ', '-').lower() + '#D[A:' + busqueda.lower() + ']'
+            page = requests.get(url=URL, headers=HEADER, timeout=5)
+            time.sleep(1)
+            if page.status_code == 200:
+                break
+            elif 400 <= page.status_code <= 404:
+                print(' ')
+                print('La búsqueda no ha devuelto resultados. Intente nuevamente.')
+                busqueda = ''
+            else:
+                print(' ')
+                print('Error interno del servidor. Intente nuevamente.')
+                busqueda = ''
+        except requests.exceptions.ConnectionError or requests.exceptions.Timeout:
+            print(' ')
+            print('Excepción de timeout.')
+            limiteTimeoutsGeneral += 1
+            print('Intento ' + str(limiteTimeoutsGeneral) + ' de 3')
+            if limiteTimeoutsGeneral == 3:
+                abortarEjecucion = True
 
-    while True:
+    while not abortarEjecucion:
         print('')
         print('Seleccione una condición de producto:')
         print(' ')
-        print('0: Nuevos y Usados')
+        print('0: Todos')
         print('1: Sólo Nuevos')
         print('2: Sólo Usados')
         print('')
         opcion = input('Ingrese una opción de condición de artículos: 0, 1 o 2: ')
         if opcion == '0' or opcion == '1' or opcion == '2':
+            abortarEjecucion = False
             break
         else:
             print('')
             print('Su opción no está contemplada. Intente nuevamente.')
-
-    URL = 'https://listado.mercadolibre.com.ar/' + busqueda.replace(' ', '-').lower() + '#D[A:' + busqueda.lower() + ']'
 
     while True:
         if ultimaPagina or abortarEjecucion:
@@ -178,7 +201,7 @@ try:
                             time.sleep(1)
                         except TypeError:
                             print('No hay artículos con esa condición en su búsqueda, '
-                                  'volviendo a la opción "0" por default...')
+                                  'volviendo a la opción "Todos" por default...')
                             opcion = '0'
 
                     condicion = None
@@ -366,9 +389,9 @@ except KeyboardInterrupt:
 
 print(' ')
 if len(df) > 0:
-    if not os.path.exists('./resultados'):
+    if not os.path.exists('../resultados'):
         print('Carpeta "resultados" creada en la raiz del proyecto.')
-        os.makedirs('./resultados')
+        os.makedirs('../resultados')
 
     nombreArchivo = ''
     df['Precio'] = df['Precio'].astype(int)
@@ -379,9 +402,9 @@ if len(df) > 0:
     elif opcion == '2':
         nombreArchivo = busqueda + ' - Sólo Usados'
 
-    opcion = f'./resultados/'+str(nombreArchivo + '.xlsx')
+    opcion = f'../resultados/'+str(nombreArchivo + '.xlsx')
     df.to_excel(opcion, index=False)
-    print(str(f'Planilla de cálculos "{nombreArchivo}.xlsx" creada correctamente en la carpeta "resultados".'))
+    print(str(f'Planilla de cálculos "{nombreArchivo}.xlsx" creada correctamente en la carpeta "resultados" en la raiz del proyecto.'))
 
     wb = openpyxl.load_workbook(filename=opcion)
     ws = wb.active
@@ -394,7 +417,11 @@ if len(df) > 0:
 else:
     print('Planilla de cálculos no fue creada. Cantidad nula de registros.')
 
-tiempoTotal = time.time() - tiempo_inicio
+if tiempo_inicio != 0:
+    tiempoTotal = time.time() - tiempo_inicio
+else:
+    tiempoTotal = 0
+
 print(' ')
 print('Páginas visitadas:', paginasVisitadas)
 print('Artículos recabados:', articulosRecabados)

@@ -30,14 +30,14 @@ Abra la terminal de su sistema operativo y siga los pasos:
 
 ## Ejecución
 <b>Versión con interfaz gráfica</b>:
-- Abra la terminal de su sistema operativo con privilegios de administrador o con superusuario.
+- Abra la terminal de su sistema operativo.
 - Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```
-- Llame a la carpeta del proyecto con ```cd MineriaLibre/vistas```
-- Ejecute el programa con ```python VentanaInicio.py```
+- Llame a la carpeta de esta versión con ```cd MineriaLibre/interfaz_grafica```
+- Ejecute el programa con ```python run.py```
 
 <b>Versión en línea de comandos</b>:
-- Abra la terminal de su sistema operativo con privilegios de administrador o con superusuario.
+- Abra la terminal de su sistema operativo.
 - Clone este repositorio en la carpeta que desee con el comando ```git clone https://github.com/cris-andrade-97/MineriaLibre```
-- Llame a la carpeta del proyecto con ```cd MineriaLibre/old```
+- Llame a la carpeta de esta versión con ```cd MineriaLibre/linea_comandos```
 - Ejecute el programa con ```python mineria.py```
 
