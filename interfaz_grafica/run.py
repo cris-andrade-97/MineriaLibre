@@ -1,11 +1,11 @@
 from PyQt5 import QtWidgets
-from vistas.VentanaInicio import Ui_Busqueda
 
 if __name__ == "__main__":
+    from vistas.VentanaInicio import Ui_Busqueda
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    VentanaInicio = QtWidgets.QMainWindow()
+    Busqueda = QtWidgets.QMainWindow()
     ui = Ui_Busqueda(app)
-    ui.setupUi(VentanaInicio)
-    VentanaInicio.show()
+    ui.setupUi(Busqueda)
+    Busqueda.show()
     sys.exit(app.exec_())

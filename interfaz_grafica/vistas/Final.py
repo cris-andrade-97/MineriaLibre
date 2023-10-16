@@ -2,24 +2,22 @@ import os
 import time
 import openpyxl
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
-import pandas as pd
+# from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox, QWidget, QLabel
+# import pandas as pd
+# from interfaz_grafica.lib import mineria
 from lib import mineria
 
-
 class Ui_Final(object):
-
-    def __init__(self, busqueda, soup, limitador, app, opcion):
-        self.app = app
-        self.limitador = limitador
-        self.tiempoInicial = time.time()
-        self.dataFrame = pd.DataFrame()
-        self.busqueda = busqueda
-        self.paginasDeArticulos = 0
-        self.soup = soup
-        self.URL = ''
-        self.abortar = False
-        self.opcion = opcion
+    def __init__(self, busqueda, opcion, dataFrame, paginas, app, tiempo_inicial):
+       self.paginasDeArticulos = paginas
+       self.app = app
+       self.tiempoInicial = tiempo_inicial
+       self.dataFrame = dataFrame
+       self.busqueda = busqueda
+       self.URL = ''
+       self.abortar = False
+       self.opcion = opcion
 
     def setupUi(self, Final):
         Final.setObjectName("Final")
@@ -79,26 +77,13 @@ class Ui_Final(object):
         self.statusbar = QtWidgets.QStatusBar(Final)
         self.statusbar.setObjectName("statusbar")
         Final.setStatusBar(self.statusbar)
-
         self.retranslateUi(Final)
         QtCore.QMetaObject.connectSlotsByName(Final)
 
     def AccionSalir(self):
         self.app.closeAllWindows()
 
-    def Scraping(self, firstSoup):
-        resultadoScraping = mineria.Scraping(self.soup, self.dataFrame, self.limitador, self.URL, firstSoup)
-        self.dataFrame = resultadoScraping[0]
-        self.paginasDeArticulos += resultadoScraping[1]
-        self.abortar = resultadoScraping[2]
-        self.URL = resultadoScraping[3]
-
     def retranslateUi(self, Final):
-        self.Scraping(True)
-        while not self.abortar:
-            self.soup = None
-            self.Scraping(False)
-
         self.app.closeAllWindows()
         tiempo = mineria.SegundosAHHMMSS(time.time() - self.tiempoInicial)
         _translate = QtCore.QCoreApplication.translate
@@ -117,7 +102,7 @@ class Ui_Final(object):
             x = msg.exec_()
 
         if self.opcion == '0':
-            self.opcion = self.busqueda + ' - Nuevos y Usados.xlsx'
+            self.opcion = self.busqueda + ' - Todos.xlsx'
         elif self.opcion == '1':
             self.opcion = self.busqueda + ' - Sólo Nuevos.xlsx'
         elif self.opcion == '2':

@@ -396,7 +396,7 @@ if len(df) > 0:
     nombreArchivo = ''
     df['Precio'] = df['Precio'].astype(int)
     if opcion == '0':
-        nombreArchivo = busqueda + ' - Nuevos y Usados'
+        nombreArchivo = busqueda + ' - Todos'
     elif opcion == '1':
         nombreArchivo = busqueda + ' - Sólo Nuevos'
     elif opcion == '2':
