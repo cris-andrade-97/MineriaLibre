@@ -5,7 +5,6 @@ from lib import mineria
 
 class HiloDeTrabajo(QThread):
     finished = pyqtSignal(list)
-
     def __init__(self, soup, limitador, opcion):
         super().__init__()
         self.soup = soup
@@ -21,9 +20,11 @@ class HiloDeTrabajo(QThread):
         self.dataFrame = result[0]
         self.paginasDeArticulos += result[1]
         self.URL = result[3]
-
         while not result[2]:
             self.soup = None
             result = mineria.Scraping(self.soup, self.dataFrame, self.limitador, self.URL, False)
+            self.dataFrame = result[0]
+            self.paginasDeArticulos += result[1]
+            self.URL = result[3]
 
         self.finished.emit(result)
