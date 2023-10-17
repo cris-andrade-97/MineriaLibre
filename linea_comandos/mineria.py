@@ -231,10 +231,10 @@ try:
                         limiteArticulos = int(input(anuncioCantidad))
                         try:
                             if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
-                                tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 2.9
+                                tiempoEstimado = (cantidadPaginas + cantidadArticulos) * 1.4
                                 break
                             elif 1 <= limiteArticulos < cantidadArticulos:
-                                tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 2.9
+                                tiempoEstimado = (int(limiteArticulos / 49) + limiteArticulos) * 1.4
                                 break
                             else:
                                 print('Opción fuera de rango. Intente nuevamente.')
