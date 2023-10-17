@@ -2,13 +2,12 @@ import os
 import time
 import openpyxl
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
+from lib import mineria
 # from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMessageBox, QWidget, QLabel
 # import pandas as pd
 # from interfaz_grafica.lib import mineria
-from lib import mineria
 # from interfaz_grafica.vistas.Busqueda import Ui_Busqueda
-
 
 class Ui_Final(object):
     def __init__(self, busqueda, opcion, dataFrame, paginas, app, tiempo_inicial):
@@ -91,6 +90,7 @@ class Ui_Final(object):
 
     def AccionSalir(self):
         self.app.closeAllWindows()
+        quit()
 
     def AccionInicio(self):
         from vistas.Busqueda import Ui_Busqueda

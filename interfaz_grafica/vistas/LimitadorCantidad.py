@@ -1,38 +1,54 @@
 import time
-
 import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMessageBox, QWidget, QLabel
-
-#from interfaz_grafica.lib import mineria
+from PyQt5.QtWidgets import QMessageBox, QWidget, QLabel, QProgressBar
 from lib import mineria
-# from interfaz_grafica.vistas.Final import Ui_Final
-from vistas.Final import Ui_Final
-# from interfaz_grafica.lib.Hilo import HiloDeTrabajo
 from lib.Hilo import HiloDeTrabajo
+from vistas.Final import Ui_Final
+#from interfaz_grafica.lib import mineria
+# from interfaz_grafica.vistas.Final import Ui_Final
+# from interfaz_grafica.lib.Hilo import HiloDeTrabajo
+# from interfaz_grafica.lib.HiloSegundo import HiloDeTrabajo2
+
 
 
 class Espera(QWidget):
-    def __init__(self, tiempo):
+    def __init__(self, tiempo, limite, cantidad):
         super().__init__()
+        self.limit = 0
+        self.avance = 0
         self.setWindowTitle("Espere")
-        self.setFixedSize(525, 150)
+        self.setFixedSize(525, 200)
         # self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.CustomizeWindowHint)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setBold(True)
         font.setPointSize(12)
+        font2 = QtGui.QFont()
+        font2.setFamily("Ubuntu")
+        font2.setBold(True)
+        font2.setPointSize(6)
         self.label = QLabel('Espere mientras se recolectan los articulos...', self)
         tiempo_estimado = 'Tiempo estimado: '+ mineria.SegundosAHHMMSS(int(tiempo))
-        self.tiempoLabel = QLabel(tiempo_estimado, self)
-        self.tiempoLabel.setGeometry(10, 60, 501, 60)
-        self.tiempoLabel.setFont(font)
-        self.label.setGeometry(10, 30, 501, 60)
+        self.label.setGeometry(10, 30, 500, 60)
         self.label.setFont(font)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.tiempoLabel = QLabel(tiempo_estimado, self)
+        self.tiempoLabel.setGeometry(10, 60, 500, 60)
+        self.tiempoLabel.setFont(font)
         self.tiempoLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.barraProgreso = QProgressBar(self)
+        self.barraProgreso.setFont(font2)
+        if limite == 0:
+            self.barraProgreso.setRange(1, cantidad)
+        else:
+            self.barraProgreso.setRange(1, limite)
 
+        self.barraProgreso.setGeometry(10, 120, 500, 40)
+        self.barraProgreso.setAlignment(QtCore.Qt.AlignCenter)
+
+    def progress(self, pace):
+        self.barraProgreso.setValue(pace)
 
 class Ui_LimitadorCantidad(object):
     def __init__(self, soup, busqueda, app, opcion):
@@ -51,7 +67,6 @@ class Ui_LimitadorCantidad(object):
 
     def VentanaFinal(self):
         self.ventana = QtWidgets.QMainWindow()
-        # def __init__(self, busqueda, opcion, dataFrame, paginas, app):
         self.uiFinal = Ui_Final(self.busqueda, self.opcion, self.dataFrame, self.paginasDeArticulos, self.app, self.tiempoInicio)
         self.uiFinal.setupUi(self.ventana)
         self.ventana.show()
@@ -122,11 +137,12 @@ class Ui_LimitadorCantidad(object):
         self.paginasDeArticulos += result[1]
         self.VentanaFinal()
 
+
     def calculoTiempo(self, limitador, cantidadExacta, paginas):
         if limitador == 0 or limitador == cantidadExacta:
-            return (paginas + cantidadExacta) * 2.9
+            return (paginas + cantidadExacta) * 1.4
         else:
-            return (int(self.limitador / 49) + limitador) * 2.9
+            return (int(self.limitador / 49) + limitador) * 1.4
 
     def BotonComenzar(self):
         ok = False
@@ -145,10 +161,11 @@ class Ui_LimitadorCantidad(object):
             msg.setText('Sólo se admiten números en este campo.\nIntente nuevamente.')
             x = msg.exec_()
         if ok:
-            self.esperar = Espera(self.calculoTiempo(self.limitador, self.cantidad, self.paginas))
+            self.esperar = Espera(self.calculoTiempo(self.limitador, self.cantidad, self.paginas),self.limitador, self.cantidad)
             self.app.closeAllWindows()
             self.esperar.show()
-            self.hiloDeTrabajo = HiloDeTrabajo(self.soup, self.limitador, self.opcion)            
+            self.hiloDeTrabajo = HiloDeTrabajo(self.soup, self.limitador)
+            self.hiloDeTrabajo.progreso.connect(self.esperar.progress)
             self.hiloDeTrabajo.finished.connect(self.manejoResultadoHilo)
             self.tiempoInicio = time.time()
             self.hiloDeTrabajo.start()
@@ -159,10 +176,10 @@ class Ui_LimitadorCantidad(object):
         self.cantidad = cantidadArticulos[0]
         self.paginas = cantidadArticulos[1]
         if cantidadArticulos[2]:
-            self.CantidadArtLabel.setText(f'Hay exactamente {cantidadArticulos[0]} artículos con esa condición.')
+            self.CantidadArtLabel.setText(f'Hay exactamente {self.cantidad} artículos con esa condición.')
         else:
-            self.CantidadArtLabel.setText(f'Hay aproximadamente {cantidadArticulos[0]} artículos con esa condición.')
-        self.LimitadorLabel.setText(f'Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y {cantidadArticulos[0]}: ')
+            self.CantidadArtLabel.setText(f'Hay aproximadamente {self.cantidad} artículos con esa condición.')
+        self.LimitadorLabel.setText(f'Ingrese 0 si desea todos los artículos ó ingrese una cantidad entre 1 y {self.cantidad}: ')
 
     def retranslateUi(self, LimitadorCantidad):
         _translate = QtCore.QCoreApplication.translate

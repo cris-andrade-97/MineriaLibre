@@ -1,9 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-#from interfaz_grafica.vistas.LimitadorCantidad import Ui_LimitadorCantidad
 from vistas.LimitadorCantidad import Ui_LimitadorCantidad
-#from interfaz_grafica.lib import mineria
 from lib import mineria
+#from interfaz_grafica.lib import mineria
+#from interfaz_grafica.vistas.LimitadorCantidad import Ui_LimitadorCantidad
+#from vistas.LimitadorCantidad import Ui_LimitadorCantidad
 
 class Ui_Busqueda(object):
     def __init__(self, app):
