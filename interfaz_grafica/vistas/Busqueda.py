@@ -86,9 +86,7 @@ class Ui_Busqueda(object):
         QtCore.QMetaObject.connectSlotsByName(Busqueda)
 
     def AccionSiguiente(self):
-
         self.busqueda = self.BusquedaTextBox.text()
-
         if len(self.busqueda) == 0:
             msg = QMessageBox()
             msg.setWindowTitle('Búsqueda vacía')
@@ -104,13 +102,11 @@ class Ui_Busqueda(object):
 
             self.soup = mineria.BusquedaInicial(self.BusquedaTextBox.text(), self.opcion)
             if self.soup == 1:
-                # popup
                 msg = QMessageBox()
                 msg.setWindowTitle('Error de solicitud')
                 msg.setText('Revise su conexión a internet.')
                 x = msg.exec_()
             elif self.soup == 0:
-                # popup
                 msg = QMessageBox()
                 msg.setWindowTitle('Error de solicitud')
                 msg.setText('La búsqueda no devolvió resultados.\nPruebe con otra búsqueda.')
@@ -126,6 +122,8 @@ class Ui_Busqueda(object):
                 else:
                     self.app.closeAllWindows()
                     self.VentanaLimitador()
+    def closeEvent(self, event):
+        event.accept()
 
     def retranslateUi(self, Busqueda):
         _translate = QtCore.QCoreApplication.translate

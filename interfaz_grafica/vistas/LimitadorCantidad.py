@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMessageBox, QWidget, QLabel, QProgressBar
 from lib import mineria
 from lib.Hilo import HiloDeTrabajo
 from vistas.Final import Ui_Final
-#from interfaz_grafica.lib import mineria
+# from interfaz_grafica.lib import mineria
 # from interfaz_grafica.vistas.Final import Ui_Final
 # from interfaz_grafica.lib.Hilo import HiloDeTrabajo
 # from interfaz_grafica.lib.HiloSegundo import HiloDeTrabajo2
@@ -50,8 +50,17 @@ class Espera(QWidget):
     def progress(self, pace):
         self.barraProgreso.setValue(pace)
 
+    def closeEvent(self, event):
+        msg = QMessageBox.question(self,'Terminar raspado','¿Está seguro de terminar la recolección?\nSe perderán todos los registros.',
+                                   QMessageBox.Yes|QMessageBox.No,QMessageBox.No)
+        if msg == QMessageBox.Yes:
+            event.accept()
+        elif msg == QMessageBox.No:
+            event.ignore()
+
 class Ui_LimitadorCantidad(object):
     def __init__(self, soup, busqueda, app, opcion):
+        self.largoFinalSet = 0
         self.paginas = 1
         self.hiloDeTrabajo = None
         self.soup = soup
@@ -64,10 +73,11 @@ class Ui_LimitadorCantidad(object):
         self.esperar = None
         self.dataFrame = pd.DataFrame()
         self.tiempoInicio = 0
+        self.carpetaNueva = False
 
     def VentanaFinal(self):
         self.ventana = QtWidgets.QMainWindow()
-        self.uiFinal = Ui_Final(self.busqueda, self.opcion, self.dataFrame, self.paginasDeArticulos, self.app, self.tiempoInicio)
+        self.uiFinal = Ui_Final(self.paginasDeArticulos, self.app, self.tiempoInicio, self.carpetaNueva, self.largoFinalSet)
         self.uiFinal.setupUi(self.ventana)
         self.ventana.show()
 
@@ -132,9 +142,13 @@ class Ui_LimitadorCantidad(object):
         self.retranslateUi(LimitadorCantidad)
         QtCore.QMetaObject.connectSlotsByName(LimitadorCantidad)
 
+    def closeEvent(self, event):
+        event.accept()
+
     def manejoResultadoHilo(self, result):
-        self.dataFrame = result[0]
-        self.paginasDeArticulos += result[1]
+        self.paginasDeArticulos += result[0]
+        self.carpetaNueva = result[1]
+        self.largoFinalSet = result[2]
         self.VentanaFinal()
 
 
@@ -164,7 +178,7 @@ class Ui_LimitadorCantidad(object):
             self.esperar = Espera(self.calculoTiempo(self.limitador, self.cantidad, self.paginas),self.limitador, self.cantidad)
             self.app.closeAllWindows()
             self.esperar.show()
-            self.hiloDeTrabajo = HiloDeTrabajo(self.soup, self.limitador)
+            self.hiloDeTrabajo = HiloDeTrabajo(self.soup, self.limitador, self.opcion, self.busqueda)
             self.hiloDeTrabajo.progreso.connect(self.esperar.progress)
             self.hiloDeTrabajo.finished.connect(self.manejoResultadoHilo)
             self.tiempoInicio = time.time()

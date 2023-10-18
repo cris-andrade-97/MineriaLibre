@@ -1,12 +1,22 @@
+import os
 import time
-
 import numpy as np
+import openpyxl
 import pandas as pd
 import requests
 from PyQt5.QtCore import QThread, pyqtSignal
 from bs4 import BeautifulSoup
 
+
+
 def CambioCaracteresRaros(tag, specs):
+    """
+    Reemplaza los caracteres extraños encontrados en las especificaciones de los artículos en la 'sopa' de
+    BeautifulSoup. Surge ante la imposibilidad de solucionarlo al forzar la codificación a Latin-1.
+    :param tag:
+    :param specs:
+    :return lista de especificaciones con caracteres limpios:
+    """
     return [str(fila.find(tag).text.strip())
             .replace('├í', 'á')
             .replace('ĂĄ', 'á')
@@ -66,6 +76,13 @@ def CambioCaracteresRaros(tag, specs):
             for fila in specs]
 
 def AsignacionDatosOrdenados(listaCabeceras, listaDatos, dataFrame):
+    """
+    Reforma el set de datos para amoldarlo al nuevo registro ó para reformar el registro y amoldarlo al set de datos; lo que ocurra primero.
+    :param listaCabeceras:
+    :param listaDatos:
+    :param dataFrame:
+    :return:
+    """
     listaIndices = []
     listaOrdenada = []
     for column in dataFrame.columns:
@@ -84,9 +101,13 @@ def AsignacionDatosOrdenados(listaCabeceras, listaDatos, dataFrame):
 
 
 class HiloDeTrabajo(QThread):
+    """
+    Hilo de ejecución que realiza el scraping, guarda los resultados de la búsqueda y los envía.
+    """
     finished = pyqtSignal(list)
     progreso = pyqtSignal(int)
-    def __init__(self, soup, limitador):
+
+    def __init__(self, soup, limitador, opcion, busqueda):
         super().__init__()
         self.soup = soup
         self.dataFrame = pd.DataFrame()
@@ -94,14 +115,21 @@ class HiloDeTrabajo(QThread):
         self.URL = ''
         self.paginasVisitadas = 0
         self.HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"}
+        self.opcion = opcion
+        self.busqueda = busqueda
+
 
     def Scrap(self, primerSoup):
+        """
+        Realiza la recolección de artículos en la página, tomando en cuenta el limitador impuesto. Ignora artículos que
+        no tengan precio ó no hayan pasado los intentos de timeout.
+        :param primerSoup:
+        :return:
+        """
         page = None
-        # limiteStatus400 = 0
         limiteTimeoutsArticulo = 0
         timeoutException = False
         abortarEjecucion = False
-        # primerSopa = True
 
         if not primerSoup:
             while limiteTimeoutsArticulo < 3:
@@ -110,7 +138,6 @@ class HiloDeTrabajo(QThread):
                     page = requests.get(self.URL, headers=self.HEADER, timeout=5)
                     self.soup = BeautifulSoup(page.content, 'html.parser', from_encoding="iso-8859-1")
                     limiteTimeoutsArticulo = 0
-                    # limiteTimeoutsGeneral = 0
                     break
                 except requests.exceptions.ConnectionError or requests.exceptions.Timeout:
                     timeoutException = True
@@ -141,7 +168,6 @@ class HiloDeTrabajo(QThread):
                         try:
                             page = requests.get(articulo, headers=self.HEADER, timeout=5)
                             limiteTimeoutsArticulo = 0
-                            # limiteTimeoutsGeneral = 0
                             break
                         except requests.exceptions.ConnectionError or requests.exceptions.Timeout:
                             timeoutException = True
@@ -207,18 +233,48 @@ class HiloDeTrabajo(QThread):
                     abortarEjecucion = True
                     break
         else:
-            # timeout
             print('Excepción de Timeout: Revise su conexión a internet.')
             abortarEjecucion = True
             pass
         return abortarEjecucion
 
     def run(self):
-        # [df,paginasVisitadas,abortarEjecucion, proximaURL]
+        """
+        Inicia el hilo de ejecución hasta que devuelva un result.
+        result consta de las páginas visitadas y si se creó o no la carpeta.
+        :return result:
+        """
+        result = []
+        carpetaCreada = False
         abortar = self.Scrap(True)
         while not abortar:
             self.soup = None
             abortar = self.Scrap(False)
-        result = [self.dataFrame,self.paginasVisitadas]
+        # result = [self.dataFrame,self.paginasVisitadas]
 
+        if not os.path.exists('../resultados'):
+            carpetaCreada = True
+            os.makedirs('../resultados')
+
+        if self.opcion == '0':
+            self.opcion = self.busqueda + ' - Todos.xlsx'
+        elif self.opcion == '1':
+            self.opcion = self.busqueda + ' - Sólo Nuevos.xlsx'
+        elif self.opcion == '2':
+            self.opcion = self.busqueda + ' - Sólo Usados.xlsx'
+
+        self.dataFrame['Precio'] = self.dataFrame['Precio'].astype(int)
+        ruta = f'../resultados/' + self.opcion
+        self.dataFrame.to_excel(ruta, index=False)
+
+        wb = openpyxl.load_workbook(filename=ruta)
+        ws = wb.active
+        for column_cells in ws.columns:
+            length = max(len(str(cell.value)) for cell in column_cells)
+            ws.column_dimensions[column_cells[0].column_letter].width = length * 1.15
+        wb.save(ruta)
+
+        result.append(self.paginasVisitadas)
+        result.append(carpetaCreada)
+        result.append(len(self.dataFrame))
         self.finished.emit(result)

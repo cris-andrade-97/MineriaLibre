@@ -1,6 +1,4 @@
-import os
 import time
-import openpyxl
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from lib import mineria
@@ -10,15 +8,15 @@ from lib import mineria
 # from interfaz_grafica.vistas.Busqueda import Ui_Busqueda
 
 class Ui_Final(object):
-    def __init__(self, busqueda, opcion, dataFrame, paginas, app, tiempo_inicial):
+    def __init__(self, paginas, app, tiempo_inicial, carpetaNueva, largoFinalSet):
        self.paginasDeArticulos = paginas
        self.app = app
        self.tiempoInicial = tiempo_inicial
-       self.dataFrame = dataFrame
-       self.busqueda = busqueda
+       self.carpetaNueva = carpetaNueva
        self.URL = ''
        self.abortar = False
-       self.opcion = opcion
+       self.largoFinalSet = largoFinalSet
+
 
     def setupUi(self, Final):
         Final.setObjectName("Final")
@@ -92,6 +90,9 @@ class Ui_Final(object):
         self.app.closeAllWindows()
         quit()
 
+    def closeEvent(self, event):
+        event.accept()
+
     def AccionInicio(self):
         from vistas.Busqueda import Ui_Busqueda
         self.app.closeAllWindows()
@@ -107,35 +108,16 @@ class Ui_Final(object):
         Final.setWindowTitle(_translate("Final", "Fin de recolección"))
         self.FinalLabel.setText(_translate("Final", "¡Recolección finalizada!"))
 
-        self.PagVisitadasLabel.setText(f'Páginas recorridas: {self.paginasDeArticulos}')
-        self.ArtRecabadosLabel.setText(f'Artículos recabados: {len(self.dataFrame)}')
-        self.TiempoTranscurLabel.setText(f'Tiempo transcurrido: {tiempo}')
-        self.VolverInicioButton.setText(_translate("Busqueda", "Volver al inico"))
-        if not os.path.exists('../resultados'):
-            os.makedirs('../resultados')
+        if self.carpetaNueva:
             msg = QMessageBox()
-            msg.setWindowTitle('Carpeta "resultados"')
-            msg.setText('Carpeta resultados creada en la raiz.')
+            msg.setWindowTitle('Carpeta \'resultados\' creada')
+            msg.setText('La carpeta \'resultados\' fue creada existosamente.')
             x = msg.exec_()
 
-        if self.opcion == '0':
-            self.opcion = self.busqueda + ' - Todos.xlsx'
-        elif self.opcion == '1':
-            self.opcion = self.busqueda + ' - Sólo Nuevos.xlsx'
-        elif self.opcion == '2':
-            self.opcion = self.busqueda + ' - Sólo Usados.xlsx'
-
-        self.dataFrame['Precio'] = self.dataFrame['Precio'].astype(int)
-        ruta = f'../resultados/' + self.opcion
-        self.dataFrame.to_excel(ruta, index=False)
-
-        wb = openpyxl.load_workbook(filename=ruta)
-        ws = wb.active
-        for column_cells in ws.columns:
-            length = max(len(str(cell.value)) for cell in column_cells)
-            ws.column_dimensions[column_cells[0].column_letter].width = length * 1.15
-
-        wb.save(ruta)
+        self.PagVisitadasLabel.setText(f'Páginas recorridas: {self.paginasDeArticulos}')
+        self.ArtRecabadosLabel.setText(f'Artículos recabados: {self.largoFinalSet}')
+        self.TiempoTranscurLabel.setText(f'Tiempo transcurrido: {tiempo}')
+        self.VolverInicioButton.setText(_translate("Busqueda", "Volver al inicio"))
 
         self.SalirButton.setText(_translate("Final", "Salir"))
 

@@ -32,7 +32,6 @@ def BusquedaInicial(search, option):
                 except TypeError:
                     condicionNoExistente = True
                     pagina = requests.get(url=busquedaURL, headers=HEADER, timeout=5)
-
                 time.sleep(1)
                 sopa = BeautifulSoup(pagina.content, 'html.parser', from_encoding="iso-8859-1")
             return [sopa, condicionNoExistente]
@@ -63,12 +62,7 @@ def CalcularCantidad(soup):
 
 
 def LimitadorCantidad(cantidadArticulos, limiteArticulos):
-    if limiteArticulos == 0 or limiteArticulos == cantidadArticulos:
-        return True
-    elif 1 <= limiteArticulos < cantidadArticulos:
-        return True
-    else:
-        return False
+    return True if 0 <= limiteArticulos <= cantidadArticulos else False
 
 
 def SegundosAHHMMSS(segundo):
