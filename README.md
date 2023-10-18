@@ -3,6 +3,23 @@
 ## Introducción
 MineriaLibre es un algoritmo dedicado a extraer datos de los artículos en MercadoLibre y en base a una búsqueda cualquiera. Se adapta satisfactoriamente a cada artículo para almacenar todos o la mayoría de los registros en una planilla de cálculo.
 
+## Objetivos del proyecto
+- Realizar una búsqueda en MercadoLibre a elección 
+- Aplicar filtros de condición de artículo a elección
+- Navegar los resultados con un algoritmo de web scraping
+- Recabar los artículos limitando la cantidad de los mismos a elección
+- Amoldar los registros al set de datos y/o viceversa
+- Entregarle al usuario una planilla con los artículos recabados
+- Robustez ante la posibilidad de timeouts del lado servidor o malas conexiones a internet
+- Desarrollar una interfaz que le facilite la búsqueda e informe de resultados
+
+## Alcances y limitaciones
+- Sólo aplicable al sitio web MercadoLibre
+- Limitación de velocidad de solicitudes
+- Variabilidad en el tiempo estimado
+- Búsquedas imprecisas pueden afectar la calidad de los registros
+- Sólo se puede aplicar un filtro
+
 ## Tecnologías usadas
 - PyCharm IDE
 - pandas
