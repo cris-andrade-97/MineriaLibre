@@ -15,6 +15,7 @@ from vistas.Final import Ui_Final
 class Espera(QWidget):
     def __init__(self, tiempo, limite, cantidad):
         super().__init__()
+        self.ignorarEvent = False
         self.limit = 0
         self.avance = 0
         self.setWindowTitle("Espere")
@@ -51,12 +52,16 @@ class Espera(QWidget):
         self.barraProgreso.setValue(pace)
 
     def closeEvent(self, event):
-        msg = QMessageBox.question(self,'Terminar raspado','¿Está seguro de terminar la recolección?\nSe perderán todos los registros.',
-                                   QMessageBox.Yes|QMessageBox.No,QMessageBox.No)
-        if msg == QMessageBox.Yes:
+        if not self.ignorarEvent:
+            msg = QMessageBox.question(self, 'Terminar raspado',
+                                       '¿Está seguro de terminar la recolección?\nSe perderán todos los registros.',
+                                       QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if msg == QMessageBox.Yes:
+                event.accept()
+            elif msg == QMessageBox.No:
+                event.ignore()
+        else:
             event.accept()
-        elif msg == QMessageBox.No:
-            event.ignore()
 
 class Ui_LimitadorCantidad(object):
     def __init__(self, soup, busqueda, app, opcion):
@@ -73,9 +78,10 @@ class Ui_LimitadorCantidad(object):
         self.esperar = None
         self.dataFrame = pd.DataFrame()
         self.tiempoInicio = 0
-        self.carpetaNueva = False
+        self.carpetaNueva = None
 
     def VentanaFinal(self):
+        self.esperar.ignorarEvent = True
         self.ventana = QtWidgets.QMainWindow()
         self.uiFinal = Ui_Final(self.paginasDeArticulos, self.app, self.tiempoInicio, self.carpetaNueva, self.largoFinalSet)
         self.uiFinal.setupUi(self.ventana)
@@ -149,6 +155,7 @@ class Ui_LimitadorCantidad(object):
         self.paginasDeArticulos += result[0]
         self.carpetaNueva = result[1]
         self.largoFinalSet = result[2]
+        self.tiempoInicio = result[3]
         self.VentanaFinal()
 
 

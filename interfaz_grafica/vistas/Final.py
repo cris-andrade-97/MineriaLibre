@@ -90,9 +90,6 @@ class Ui_Final(object):
         self.app.closeAllWindows()
         quit()
 
-    def closeEvent(self, event):
-        event.accept()
-
     def AccionInicio(self):
         from vistas.Busqueda import Ui_Busqueda
         self.app.closeAllWindows()

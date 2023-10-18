@@ -117,6 +117,7 @@ class HiloDeTrabajo(QThread):
         self.HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"}
         self.opcion = opcion
         self.busqueda = busqueda
+        self.tiempoInicio = time.time()
 
 
     def Scrap(self, primerSoup):
@@ -277,4 +278,5 @@ class HiloDeTrabajo(QThread):
         result.append(self.paginasVisitadas)
         result.append(carpetaCreada)
         result.append(len(self.dataFrame))
+        result.append(self.tiempoInicio)
         self.finished.emit(result)
